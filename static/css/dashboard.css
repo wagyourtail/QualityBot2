@@ -1,0 +1,52 @@
+body {
+    overflow: hidden;
+    font-family: 'Segoe UI';
+    margin: 0px;
+}
+
+.content {
+    display: grid;
+    grid-template-columns: 200px auto;
+}
+
+.sidebar {
+    line-height: 50px;
+    background-color: #282828;
+    border-top: 2px solid #383838;
+    height: 100vh;
+    overflow-x: hidden;
+    overflow-y: scroll;
+    scrollbar-width: none;
+    color: white
+}
+
+.guildSelector {
+    display: block;
+    white-space: nowrap;
+    margin-bottom: 5px;
+    cursor: pointer;
+    color: white;
+    text-decoration: none;
+    padding: 2px 0;
+}
+
+.guildSelector:hover {
+    background-color: #323232;
+}
+
+.guildSelector.currentGuild {
+    background-color: #7777FF60;
+}
+
+.guildSelector img {
+    display: inline-block;
+    vertical-align: middle;
+    margin-right: 20px;
+    border-radius: 50%;
+}
+
+.pluginContent {
+    height: 100vh;
+    background-color: #7777FF;
+    border-left: 2px solid #484878;
+}

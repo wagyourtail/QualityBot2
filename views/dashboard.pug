@@ -1,0 +1,21 @@
+doctype html
+html
+    head
+        title Quality Bot
+        link(rel= "stylesheet" href= "/static/css/dashboard.css")
+        link(rel= "stylesheet" href="/static/css/topbar.css")
+        link(rel= "stylesheet" href="/static/css/footer.css")
+        block style
+    body
+        include global/topbar.pug
+        .content
+            .sidebar
+                each guild in adminGuilds
+                    a(class= `guildSelector${guild.id == guildID ? " currentGuild" : ""}` href= `/dashboard/${guild.id}/null`)
+                        if guild.icon
+                            img(src= `https://cdn.discordapp.com/icons/${guild.id}/${guild.icon}.webp?size=128` width='50px', height='50px')
+                        =guild.name
+            .pluginContent
+                block pluginContent
+        include global/footer.pug
+        script(src= "/static/js/index.js")

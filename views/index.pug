@@ -1,0 +1,19 @@
+doctype html
+html
+    head
+        title Quality Bot
+        link(rel= "stylesheet" href="/static/css/index.css")
+        link(rel= "stylesheet" href="/static/css/topbar.css")
+        link(rel= "stylesheet" href="/static/css/footer.css")
+    body
+        include global/topbar.pug
+        .content
+            h1 Automate Your Discord Server
+            h2 Have a dynamic bot with just the features you want.
+            .inline
+                a(id="add", href="/add") 
+                    img(src= "/static/images/discord.png" height= "50px" width= "50px")
+                    ="Add to Discord"
+                a(id="features", href="/features") See Features
+        include global/footer.pug
+        script(src= "/static/js/index.js")
