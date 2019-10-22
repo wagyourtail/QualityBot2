@@ -4,6 +4,7 @@
   "description": "qualitybot rebuilt to use a database for website functionality.",
   "main": "bot.js",
   "dependencies": {
+    "aki-api": "^3.2.1",
     "discord.js": "^11.5.1",
     "express": "^4.17.1",
     "express-session": "^1.17.0",
@@ -12,7 +13,8 @@
     "passport-discord.js": "^0.0.6",
     "pug": "^2.0.4",
     "redis": "^2.8.0",
-    "request": "^2.88.0"
+    "request": "^2.88.0",
+    "weather-js": "^2.0.0"
   },
   "devDependencies": {},
   "scripts": {

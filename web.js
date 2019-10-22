@@ -78,7 +78,7 @@ app.get('/dashboard', checkAuth, (req, res) => {
 
 app.get('/dashboard/:guildID/:pluginSlug', checkAuth, (req, res) => {
     const adminGuilds = req.user.guilds.filter(guild => {return guild.permissions & 8});
-    res.render(`plugins/${req.pluginSlug}`, {guildID: req.guildID, adminGuilds: adminGuilds, loginStatus: !!req.user, userAvatar: req.user ? `https://cdn.discordapp.com/avatars/${req.user.id}/${req.user.avatar}.png` : false, userName: req.user ? req.user.username : false});
+    res.render(`plugins/${req.pluginSlug}/${req.pluginSlug}`, {guildID: req.guildID, adminGuilds: adminGuilds, loginStatus: !!req.user, userAvatar: req.user ? `https://cdn.discordapp.com/avatars/${req.user.id}/${req.user.avatar}.png` : false, userName: req.user ? req.user.username : false});
 });
 
 app.get('/info', checkAuth, (req, res) => {

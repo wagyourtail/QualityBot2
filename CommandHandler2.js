@@ -14,7 +14,6 @@ class Client extends Discord.Client {
     }
     addPlugin(plugin) {
         this.plugins.set(plugin.name, plugin);
-        plugin.core(this);
     }
     checkRoles(member, commandPerms) {
         return false;
@@ -33,9 +32,17 @@ class Client extends Discord.Client {
                             const { aliases, perms } = response;
                             if (this.plugins.has(plugin)) {
                                 this.plugins.get(plugin).forEach((command, commandName) => {
+                                    if (!aliases[commandName]) {
+                                        aliases[commandName] = command.aliases;
+                                        this.database.setGuildPluginAliases(msg.guild.id, plugin, aliases);
+                                    }
                                     for (const alias of aliases[commandName]) {
                                         if (content.toLowerCase().split(' ')[0] == alias) {
-                                            if (member.hasPermission(8) || this.checkRoles(member, perms[commandName]) || member.id == owner) {
+                                            if (!perms[commandName]) {
+                                                perms[commandName] = command.aliases;
+                                                this.database.setGuildPluginPerms(msg.guild.id, plugin, perms);
+                                            }
+                                            if (member.hasPermission(8) || this.checkRoles(member, perms[commandName]) || member.id == this.owner) {
                                                 command.message(content.substring(alias.length + 1), member, msg.channel, msg.guild, msg, this);
                                             }
                                         }
@@ -59,13 +66,11 @@ class Plugin extends Discord.Collection {
         this.aliases = {}
     }
     addCommand(command) {
-        command.plugin = this;
-        command.handler = this;
+        command.plugin = this.name;
         this.perms[command.name] = command.perms;
         this.aliases[command.name] = command.aliases;
         this.set(command.name, command);
     }
-    core(handler) { } //for core-plugins when you need immediate access to the client event emitter (this.handler) on plugin init;
 }
 
 class Command {
@@ -82,16 +87,25 @@ class Command {
             .setTitle(`Help: ${this.name}`)
             .setThumbnail(handler.user.avatarURL)
             .addField("Usage", this.usage)
-            .addField("Description", this.description);
-        handler.database.getGuildPluginAliasesAndPerms(guild.id, this.plugin.name, this.plugin.aliases, this.plugin.perms).then(response => {
+            .addField("Description", this.description)
+            .setDescription(this.plugin);
+        handler.database.getGuildPluginAliasesAndPerms(guild.id, this.plugin, handler.plugins.get(this.plugin).aliases, handler.plugins.get(this.plugin).perms).then(response => {
             const { aliases, perms } = response;
-            reply.addField("Aliases",  aliases[this.name]);
+            if (!aliases[this.name]) {
+                aliases[this.name] = command.aliases;
+                this.database.setGuildPluginAliases(guild.id, plugin, aliases);
+            }
+            if (!perms[this.name]) {
+                perms[this.name] = command.aliases;
+                this.database.setGuildPluginPerms(guild.id, plugin, perms);
+            }
+            reply.addField("Aliases",  aliases[this.name].join(", "));
             const roles = [];
             for (const role of perms[this.name]) {
                 if (guild.roles.has(role)) roles.push(guild.roles.get(role).toString());
                 if (role == "@everyone") roles.push("@everyone");
             }
-            if (roles.length > 0) reply.addField("Permissions", roles.join('\n'));
+            if (roles.length > 0) reply.addField("Permissions", roles.join(", "));
             channel.send(reply);
        });
     }
@@ -102,7 +116,7 @@ class RichEmbed extends Discord.RichEmbed {
 	constructor() {
 		super();
 		this.setTimestamp();
-		this.setFooter("Wagyourtail 2019. bit.ly/QualityBot");
+		this.setFooter("Wagyourtail 2019. bit.ly/QualityBot2");
 	}
 }
 

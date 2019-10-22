@@ -6,9 +6,9 @@ module.exports.getGuild = function(guildID, prefix) {
     return new Promise((resolve, reject) => {
         db.sismember("Guilds", guildID, (error, reply) => {
             if (reply == 0) {
-                db.set(`Guilds:${guildID}`, `{ "prefix": "${prefix}", "enabled": ["default"] }`);
+                db.set(`Guilds:${guildID}`, `{ "prefix": "${prefix}", "enabled": ["Default"] }`);
                 db.sadd("Guilds", guildID);
-                resolve({prefix:prefix, enabled:["default"]});
+                resolve({prefix:prefix, enabled:["Default"]});
             } else {
                 db.get(`Guilds:${guildID}`, (error, reply) => {
                     const data = JSON.parse(reply);
@@ -39,6 +39,23 @@ module.exports.getGuildPluginAliasesAndPerms = function(guildID, plugin, default
     });
 }
 
+module.exports.getGuildPluginData = function(guildID, plugin, defaultData) {
+    return new Promise((resolve, reject) => {
+        db.hget(`Guilds:${guildID}:Plugins:${plugin}`, "Data", (error, reply) => {
+            if (reply) {
+                resolve(JSON.parse(reply));
+            } else {
+                db.hset(`Guilds:${guildID}:Plugins:${plugin}`, "Data", JSON.stringify(defaultData));
+                resolve(defaultData);
+            }
+        });
+    });
+}
+
+module.exports.setGuildPluginData = function(guildID, plugin, data) {
+    db.hset(`Guilds:${guildID}:Plugins:${plugin}`, "Data", JSON.stringify(data));
+}
+
 module.exports.setGuildPluginAliases = function(guildID, plugin, aliasesObject) {
     db.hset(`Guilds:${guildID}:Plugins:${plugin}`, "Alias", JSON.stringify(aliasesObject));
 }
@@ -47,6 +64,23 @@ module.exports.setGuildPluginPerms = function(guildID, plugin, permsObject) {
     db.hset(`Guilds:${guildID}:Plugins:${plugin}`, "Perms", JSON.stringify(permsObject));
 }
 
+module.exports.setGuildPrefix = function(guildID, prefix) {
+    db.get(`Guilds:${guildID}`, (error, reply) => {
+        const data = JSON.parse(reply);
+        data.prefix = prefix;
+        db.set(`Guilds:${guildID}`, JSON.stringify(data));
+    });
+}
+
+module.exports.setGuildEnabled = function(guildID, plugins) {
+    db.get(`Guilds:${guildID}`, (error, reply) => {
+        const data = JSON.parse(reply);
+        data.enabled = plugins;
+        db.set(`Guilds:${guildID}`, JSON.stringify(data));
+    });
+}
+
+/* token and secret for bot id */
 module.exports.getClientToken = function(clientID) {
     return new Promise((resolve, reject) => {
         db.sismember("Secrets", clientID, (err, reply) => {
