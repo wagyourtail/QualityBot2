@@ -1,3 +1,4 @@
 node_modules/*
 views/plugins/*
 !view/plugins/null
+bot.js
