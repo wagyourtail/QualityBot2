@@ -15,7 +15,7 @@ const updateMessage = (guild, data) => {
 
 class GameRole extends Discord.Command {
     constructor() {
-        super("gamerole", [], "gamerole add **role** **emoji**\ngamerole del **emoji**", "manages roles to hand people for reacting to a message.\n**role** is required and must be a role resolvable (either number or @mention)", false);
+        super("gamerole", [], "gamerole list\ngamerole add **role** **emoji**\ngamerole del **emoji**", "manages roles to hand people for reacting to a message.\n**role** is required and must be a role resolvable (either number or @mention)", false);
     }
     message(content, member, channel, guild, message, handler) {
         switch(content.split(' ')[0]) {

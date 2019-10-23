@@ -4,6 +4,10 @@ body {
     margin: 0px;
 }
 
+.topbar {
+    border-bottom: 2px solid #383838;
+}
+
 .content {
     display: grid;
     grid-template-columns: 200px auto;
@@ -12,12 +16,23 @@ body {
 .sidebar {
     line-height: 50px;
     background-color: #282828;
-    border-top: 2px solid #383838;
+    border-right: 2px solid #484878;
     height: 100vh;
     overflow-x: hidden;
     overflow-y: scroll;
     scrollbar-width: none;
-    color: white
+    color: white;
+}
+
+#guilds {
+    width: 198px;
+    margin-top: 5px;
+}
+
+#addGuild {
+    position: absolute;
+    bottom: 63px;
+    width: 198px;
 }
 
 .guildSelector {
@@ -48,5 +63,50 @@ body {
 .pluginContent {
     height: 100vh;
     background-color: #7777FF;
-    border-left: 2px solid #484878;
+}
+
+.saveBar {
+    display: grid;
+    grid-template-columns: 200px auto 100px 100px 20px;
+    margin-top: 0px;
+    padding-top: 15px;
+}
+
+.saveBar h1 {
+    margin: 0;
+    padding-left: 20px;
+}
+
+#reset {
+    background-color: #4C4C4C;
+    border: none;
+    color: white;
+    margin-right: 5px;
+    padding: 10px 32px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+#reset:hover {
+    background-color: #535353;
+}
+
+#submit {
+    background-color: #4CAF50;
+    border: none;
+    color: white;
+    margin-left: 5px;
+    padding: 10px 20px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+#submit:hover {
+    background-color: #53B656;
 }

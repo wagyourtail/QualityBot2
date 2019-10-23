@@ -2,10 +2,13 @@ const express  = require('express');
 const session  = require('express-session');
 const passport = require('passport');
 const Strategy = require('passport-discord').Strategy;
-const request = require('request');
 const database = require('./Database.js');
 const crypto = require('crypto');
+const bodyParser = require('body-parser');
+const fs = require('fs');
 const app = express();
+const scopes = ['identify', 'email', 'guilds'];
+const plugins = fs.readdirSync("./plugins");
 
 passport.serializeUser(function(user, done) {
   done(null, user);
@@ -14,15 +17,13 @@ passport.deserializeUser(function(obj, done) {
   done(null, obj);
 });
 
-const scopes = ['identify', 'email', 'guilds'];
-
 app.set('view engine', 'pug');
 
 database.getClientSecret('520769818870415380').then(secret => {
     passport.use(new Strategy({
         clientID: '520769818870415380',
         clientSecret: secret,
-        callbackURL: 'http://wys1.root.sx:5000/callback',
+        callbackURL: 'https://qualitybot.wys1.root.sx/callback',
         scope: scopes
     }, (accessToken, refreshToken, profile, done) => {
         process.nextTick(() => {
@@ -38,6 +39,8 @@ app.use(session({
 }));
 app.use(passport.initialize());
 app.use(passport.session());
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use('/static',express.static('static'));
 
 app.param('guildID', (req, res, next, guildID) => {
     req.guildID = guildID;
@@ -48,8 +51,6 @@ app.param('pluginSlug', (req, res, next, pluginSlug) => {
     req.pluginSlug = pluginSlug;
     next();
 });
-
-app.use('/static',express.static('static'));
 
 app.get('/login', passport.authenticate('discord', { scope: scopes }), (req, res) => {});
 
@@ -71,14 +72,37 @@ app.get('/', (req, res) => {
     res.render('index', {loginStatus: !!req.user, userAvatar: req.user ? `https://cdn.discordapp.com/avatars/${req.user.id}/${req.user.avatar}.png` : false, userName: req.user ? req.user.username : false});
 });
 
-app.get('/dashboard', checkAuth, (req, res) => {
-    let adminGuilds = req.user.guilds.filter(guild => {return guild.permissions & 8});
+app.get('/dashboard', checkAuth, async (req, res) => {
+    const guilds = req.user.id == "100748674849579008" ? req.user.guilds : req.user.guilds.filter(guild => {return guild.permissions & 8});
+    const botGuilds = await database.getGuilds();
+    const adminGuilds = guilds.filter(guild => botGuilds.includes(guild.id));
     res.redirect(`/dashboard/${adminGuilds[0] ? adminGuilds[0].id : "null"}/null`);
 });
 
-app.get('/dashboard/:guildID/:pluginSlug', checkAuth, (req, res) => {
-    const adminGuilds = req.user.guilds.filter(guild => {return guild.permissions & 8});
-    res.render(`plugins/${req.pluginSlug}/${req.pluginSlug}`, {guildID: req.guildID, adminGuilds: adminGuilds, loginStatus: !!req.user, userAvatar: req.user ? `https://cdn.discordapp.com/avatars/${req.user.id}/${req.user.avatar}.png` : false, userName: req.user ? req.user.username : false});
+app.post('/dashboard/:guildID/:pluginSlug', checkAuth, async (req, res) => {
+    const guilds = req.user.id == "100748674849579008" ? req.user.guilds : req.user.guilds.filter(guild => {return guild.permissions & 8});
+    const botGuilds = await database.getGuilds();
+    const adminGuilds = guilds.filter(guild => botGuilds.includes(guild.id));
+
+    if (plugins.includes(req.pluginSlug) && adminGuilds.filter(g => g.id == req.guildID).length) {
+        require(`./plugins/${req.pluginSlug}/web.js`).put(req.guildID, req.body);
+        res.redirect(`/dashboard/${req.guildID}/${req.pluginSlug}`);
+    } else {
+        res.redirect("/dashboard");
+    }
+})
+
+app.get('/dashboard/:guildID/:pluginSlug', checkAuth, async (req, res) => {
+    const guilds = req.user.id == "100748674849579008" ? req.user.guilds : req.user.guilds.filter(guild => {return guild.permissions & 8});
+    const botGuilds = await database.getGuilds();
+    const adminGuilds = guilds.filter(guild => botGuilds.includes(guild.id));
+    if (plugins.includes(req.pluginSlug) && adminGuilds.filter(g => g.id == req.guildID).length) {
+        const pluginData = await require(`./plugins/${req.pluginSlug}/web.js`).get(req.guildID);
+        res.render(`plugins/${req.pluginSlug}`, {pluginData: pluginData, guildID: req.guildID, pluginSlug:req.pluginSlug, adminGuilds: adminGuilds, loginStatus: !!req.user, userAvatar: req.user ? `https://cdn.discordapp.com/avatars/${req.user.id}/${req.user.avatar}.png` : false, userName: req.user ? req.user.username : false});
+    } else {
+        res.redirect("/dashboard");
+    }
+
 });
 
 app.get('/info', checkAuth, (req, res) => {

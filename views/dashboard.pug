@@ -10,12 +10,24 @@ html
         include global/topbar.pug
         .content
             .sidebar
-                each guild in adminGuilds
-                    a(class= `guildSelector${guild.id == guildID ? " currentGuild" : ""}` href= `/dashboard/${guild.id}/null`)
-                        if guild.icon
-                            img(src= `https://cdn.discordapp.com/icons/${guild.id}/${guild.icon}.webp?size=128` width='50px', height='50px')
-                        =guild.name
-            .pluginContent
-                block pluginContent
+                #guilds
+                    each guild in adminGuilds
+                        a(class= `guildSelector${guild.id == guildID ? " currentGuild" : ""}` href= `/dashboard/${guild.id}/null`)
+                            if guild.icon
+                                img(src= `https://cdn.discordapp.com/icons/${guild.id}/${guild.icon}.webp?size=128` width='50px', height='50px')
+                            =guild.name
+                #addGuild
+                    a(class="guildSelector" href="https://discordapp.com/api/oauth2/authorize?client_id=520769818870415380&scope=bot&permissions=8" target="_blank") 
+                        img(src="/static/images/discord.png" width='50px' height='50px')
+                        ="Add A Discord"
+            .main
+                .saveBar
+                    h1(class= "pluginName")= pluginSlug == "null" ? "Plugins" : pluginSlug
+                    div
+                    input(id= "reset" type= "button" onclick= "location.reload()" value= "reset")
+                    input(id= "submit" type= "submit" form= "pluginContent" value= "Apply" disabled= pluginData.nopost)
+                    div
+                form(id= "pluginContent" class= "pluginContent" method= "post")
+                    block pluginContent
         include global/footer.pug
         script(src= "/static/js/index.js")

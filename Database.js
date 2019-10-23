@@ -2,6 +2,14 @@
 const redis = require('redis');
 const db = redis.createClient({db: 1});
 
+module.exports.getGuilds = function() {
+    return new Promise((resolve, reject) => {
+        db.smembers("Guilds", (error, reply) => {
+            resolve(reply);
+        });
+    });
+}
+
 module.exports.getGuild = function(guildID, prefix) {
     return new Promise((resolve, reject) => {
         db.sismember("Guilds", guildID, (error, reply) => {
@@ -81,11 +89,19 @@ module.exports.setGuildEnabled = function(guildID, plugins) {
 }
 
 /* token and secret for bot id */
+module.exports.getClients = function() {
+    return new Promise((resolve, reject) => {
+        db.smembers("Secrets", (err, reply) => {
+            resolve(reply);
+        });
+    });
+}
+
 module.exports.getClientToken = function(clientID) {
     return new Promise((resolve, reject) => {
         db.sismember("Secrets", clientID, (err, reply) => {
             if (reply == 0)
-                throw "Bot Not Found";
+                reject("Bot Not Found");
             else {
                 db.hget(`Secrets:${clientID}`, "Token", (err, reply) => {
                     resolve(reply);
@@ -99,7 +115,7 @@ module.exports.getClientSecret = function(clientID) {
     return new Promise((resolve, reject) => {
         db.sismember("Secrets", clientID, (err, reply) => {
             if (reply == 0)
-                throw "Bot Not Found";
+                reject("Bot Not Found");
             else {
                 db.hget(`Secrets:${clientID}`, "Secret", (err, reply) => {
                     resolve(reply);

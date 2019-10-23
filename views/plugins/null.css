@@ -1,0 +1,21 @@
+.plugins {
+    margin-top: 20px;
+}
+
+.plugin {
+    display: inline-block;
+    background-color: #5C5C5C;
+    margin: 30px;
+    padding: 20px;
+    width: 205px;
+}
+
+.plugin a {
+    padding-left: 10px;
+    text-decoration: none;
+    color: white;
+}
+
+.plugin a:hover {
+    color: #DDDDDD;
+}
