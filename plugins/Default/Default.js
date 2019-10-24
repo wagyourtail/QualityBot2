@@ -80,11 +80,11 @@ class Permissions extends Discord.Command {
                                 if (regexMatch && guild.roles.has(regexMatch[1]) && regexMatch[1] != guild.id && !perms[content[1]].includes(regexMatch[1])) {
                                     perms[content[1]] = perms[content[1]] ? perms[content[1]].concat(regexMatch[1]) : [regexMatch[1]];
                                     handler.database.setGuildPluginPerms(guild.id, plugin, perms);
-                                    reply.addField("Success", `Sucessfully added ${content[2]} to \`${content[1]}\`.`, false);
+                                    reply.addField("Success", `Sucessfully added ${content[2]} to **${content[1]}**.`, false);
                                 } else if ((content[2] == "@everyone" || regexMatch[1] == guild.id) && !perms[content[1]].includes("@everyone")) {
                                     perms[content[1]] = perms[content[1]] ? perms[content[1]].concat(["@everyone"]) : ["@everyone"];
                                     handler.database.setGuildPluginPerms(guild.id, plugin, perms);
-                                    reply.addField("Success", `Sucessfully added @everyone to ${content[1]}.`, false);
+                                    reply.addField("Success", `Sucessfully added @everyone to **${content[1]}**.`, false);
                                 } else {
                                     reply.addField("Fail", "**role** did not parse, or is already there.", false);
                                 }
@@ -113,11 +113,11 @@ class Permissions extends Discord.Command {
                                 if (regexMatch && regexMatch[1] != guild.id && perms[content[1]].includes(regexMatch[1])) {
                                     perms[content[1]] = perms[content[1]] ? perms[content[1]].filter(e => e != regexMatch[1]) : [];
                                     handler.database.setGuildPluginPerms(guild.id, plugin, perms);
-                                    reply.addField("Success", `Sucessfully removed ${content[2]} from \`${content[1]}\`.`, false);
+                                    reply.addField("Success", `Sucessfully removed ${content[2]} from **${content[1]}**.`, false);
                                 } else if ((content[2] == "@everyone" || (regexMatch && regexMatch[1] == guild.id)) && perms[content[1]].includes("@everyone")) {
                                     perms[content[1]] = perms[content[1]] ? perms[content[1]].filter(e => e != "@everyone") : [];
                                     handler.database.setGuildPluginPerms(guild.id, plugin, perms);
-                                    reply.addField("Success", `Sucessfully removed @everyone from ${content[1]}.`, false);
+                                    reply.addField("Success", `Sucessfully removed @everyone from **${content[1]}**.`, false);
                                 } else {
                                     reply.addField("Fail", "**role** did not parse, or is not there.", false);
                                 }
@@ -201,7 +201,7 @@ class Aliases extends Discord.Command {
                                 if (content[2] && !aliases[content[1]].includes(content[2])) {
                                     aliases[content[1]] = aliases[content[1]] ? aliases[content[1]].concat(content[2]) : [content[2]];
                                     handler.database.setGuildPluginAliases(guild.id, plugin, aliases);
-                                    reply.addField("Success", `Sucessfully added ${content[2]} to \`${content[1]}\`.`, false);
+                                    reply.addField("Success", `Sucessfully added \`${content[2]}\` to **${content[1]}**.`, false);
                                 } else {
                                     reply.addField("Fail", `**alias** didn't parse, or already exists.`, false);
                                 }
@@ -229,7 +229,7 @@ class Aliases extends Discord.Command {
                                 if (content[2] && aliases[content[1]].includes(content[2])) {
                                     aliases[content[1]] = aliases[content[1]] ? aliases[content[1]].filter(e => e != content[2]) : [];
                                     handler.database.setGuildPluginAliases(guild.id, plugin, aliases);
-                                    reply.addField("Success", `Sucessfully removed ${content[2]} from \`${content[1]}\`.`, false);
+                                    reply.addField("Success", `Sucessfully removed \`${content[2]}\` from **${content[1]}**.`, false);
                                 } else {
                                     reply.addField("Fail", `**alias** didn't parse, or already exists.`, false);
                                 }
@@ -280,9 +280,9 @@ class SetPrefix extends Discord.Command {
         content = content.split(' ');
         const reply = new Discord.RichEmbed()
             .setTitle("SetPrefix: ");
-        if (content[0]) {
+        if (content[0] && content[0].length < 10 && content[0].length > 0) {
             handler.database.setGuildPrefix(guild.id, content[0]);
-            reply.setDescription(`Prefix sucessfully set to ${content[0]}`);
+            reply.setDescription(`Prefix sucessfully set to \`${content[0]}\``);
         } else {
             reply.setDescription("Failed, **prefix** could not be parsed");
         }
@@ -347,7 +347,7 @@ class Plugins extends Discord.Command {
                     const reply = new Discord.RichEmbed()
                         .setTitle("Plugins: disable");
                     const result = Array.from(handler.plugins.keys()).filter(e => e.toLowerCase() == content[1].toLowerCase());
-                    if (result.length && enabled.includes(result[0])) {
+                    if (result.length && enabled.includes(result[0]) && result[0] != "Default") {
                         reply.setDescription(result[0]);
                         handler.database.setGuildEnabled(guild.id, enabled.filter(e => e != result[0]));
                     } else {

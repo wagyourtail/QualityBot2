@@ -6,12 +6,5 @@ block style
         include AdvancedInfo.css
 
 block pluginContent
-    p(class= "description") Not really much to configure here, so here's the same info the commands would give in Discord.
-    .commands
-        #roles
-            h2 AIListRoles
-            div
-                each role in pluginData.roles
-                    font(color= `#${role.color}`)=`@${role.name.replace('@', '')}`
-                    =`: ${role.id}`
-                    br
+    p(class= "description") 
+    

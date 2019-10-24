@@ -57,19 +57,20 @@ body {
     display: inline-block;
     vertical-align: middle;
     margin-right: 20px;
+    padding-left: 5px;
     border-radius: 50%;
 }
 
-.pluginContent {
-    height: 100vh;
+.main {
     background-color: #7777FF;
 }
 
 .saveBar {
     display: grid;
+    background-color: white;
     grid-template-columns: 200px auto 100px 100px 20px;
     margin-top: 0px;
-    padding-top: 15px;
+    padding: 15px 0px;
 }
 
 .saveBar h1 {
@@ -109,4 +110,43 @@ body {
 
 #submit:hover {
     background-color: #53B656;
+}
+
+.pluginContent {
+    scrollbar-width: none;
+    overflow-y: scroll;
+}
+
+.commands {
+    margin-top: 20px;
+}
+
+.command {
+    vertical-align: top;
+    display: inline-block;
+    color: white;
+    background-color: #5C5C5C;
+    padding: 20px;
+    margin: 10px;
+    border: 2px solid #333333;
+}
+
+.input {
+    border-radius: 10px;
+    background-color: #888888;
+    border-style: none;
+    padding: 5px;
+    margin: 2px;
+}
+
+.input input {
+    border-style: none;
+    background-color: #888888;
+}
+
+.input .button {
+    font-weight: bold;
+    font-size: 18px;
+    color: white;
+    cursor: pointer;
 }

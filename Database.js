@@ -27,6 +27,15 @@ module.exports.getGuild = function(guildID, prefix) {
     });
 }
 
+module.exports.checkGuildPlugin = function(guildID, plugin) {
+    return new Promise((resolve, reject) => {
+        db.sismember(`Guilds:${guildID}:Plugins`, plugin, (error, reply) => {
+            if (reply == 0) resolve(false);
+            else resolve(true);
+        });
+    });
+}
+
 module.exports.getGuildPluginAliasesAndPerms = function(guildID, plugin, defaultPluginAliases, defaultPluginPerms) {
     return new Promise((resolve, reject) => {
         db.sismember(`Guilds:${guildID}:Plugins`, plugin, (error, reply) => {
@@ -37,7 +46,7 @@ module.exports.getGuildPluginAliasesAndPerms = function(guildID, plugin, default
             } else {
                 db.hmget(`Guilds:${guildID}:Plugins:${plugin}`, "Alias", "Perms", (err, res) => {
                     try {
-                        resolve({aliases:JSON.parse(res[0]), perms:JSON.parse(res[1])});
+                        resolve({aliases:Object.assign(defaultPluginAliases, JSON.parse(res[0])), perms:Object.assign(defaultPluginPerms, JSON.parse(res[1]))});
                     } catch(e) {
                         console.log(err);
                     }

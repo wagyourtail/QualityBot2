@@ -32,16 +32,8 @@ class Client extends Discord.Client {
                             const { aliases, perms } = response;
                             if (this.plugins.has(plugin)) {
                                 this.plugins.get(plugin).forEach((command, commandName) => {
-                                    if (!aliases[commandName]) {
-                                        aliases[commandName] = command.aliases;
-                                        this.database.setGuildPluginAliases(msg.guild.id, plugin, aliases);
-                                    }
                                     for (const alias of aliases[commandName]) {
                                         if (content.toLowerCase().split(' ')[0] == alias) {
-                                            if (!perms[commandName]) {
-                                                perms[commandName] = command.aliases;
-                                                this.database.setGuildPluginPerms(msg.guild.id, plugin, perms);
-                                            }
                                             if (member.hasPermission(8) || this.checkRoles(member, perms[commandName]) || member.id == this.owner) {
                                                 command.message(content.substring(alias.length + 1), member, msg.channel, msg.guild, msg, this);
                                             }
@@ -91,14 +83,6 @@ class Command {
             .setDescription(this.plugin);
         handler.database.getGuildPluginAliasesAndPerms(guild.id, this.plugin, handler.plugins.get(this.plugin).aliases, handler.plugins.get(this.plugin).perms).then(response => {
             const { aliases, perms } = response;
-            if (!aliases[this.name]) {
-                aliases[this.name] = command.aliases;
-                this.database.setGuildPluginAliases(guild.id, plugin, aliases);
-            }
-            if (!perms[this.name]) {
-                perms[this.name] = command.aliases;
-                this.database.setGuildPluginPerms(guild.id, plugin, perms);
-            }
             reply.addField("Aliases",  aliases[this.name].join(", "));
             const roles = [];
             for (const role of perms[this.name]) {

@@ -23,11 +23,35 @@ html
             .main
                 .saveBar
                     h1(class= "pluginName")= pluginSlug == "null" ? "Plugins" : pluginSlug
-                    div
+                    .description
+                        block description
                     input(id= "reset" type= "button" onclick= "location.reload()" value= "reset")
-                    input(id= "submit" type= "submit" form= "pluginContent" value= "Apply" disabled= pluginData.nopost)
+                    input(id= "submit" type= "submit" form= "pluginContent" value= "Apply")
                     div
                 form(id= "pluginContent" class= "pluginContent" method= "post")
                     block pluginContent
+                    .commands
+                        each command in Object.keys(pluginData.aliases)
+                            .command(id= command)
+                                h2= command
+                                .aliases Aliases
+                                    each alias in pluginData.aliases[command]
+                                        .input 
+                                            input(class="alias" type= "text" name= `${command}.aliases` value= alias data-lpignore="true")
+                                            input(type= "button" class= "button" value="x" onclick="this.parentNode.remove()")
+                                    .input(class="newAlias")
+                                        input(class= "alias" type= "text" name= `${command}.aliases` data-lpignore="true")
+                                        input(type= "button" class= "button" value="+" onclick=`newAlias('${command}', this)`)
+                                .perms Perms
+                                    each perm in pluginData.perms[command].filter(e => Object.keys(pluginData.roles).includes(e))
+                                        .input
+                                            input(class= "perm" type="text" name= `${command}.perms` list="roles" value= `@${pluginData.roles[perm].name.replace('@', '')}` data-lpignore="true")
+                                            input(type= "button" class= "button" value="x" onclick="this.parentNode.remove()")
+                                    .input
+                                        input(class= "perm" type="text" name= `${command}.perms` list="roles" data-lpignore="true")
+                                        input(type= "button" class= "button" value="+" onclick=`newPerm('${command}', this)`)
+                            datalist(id= "roles")
+                                each role, id in pluginData.roles
+                                    option(style=`#${role.color}`)= `@${role.name.replace('@', '')}`
         include global/footer.pug
-        script(src= "/static/js/index.js")
+        script(src= "/static/js/dashboard.js")

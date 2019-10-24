@@ -23,7 +23,7 @@ const waitForReact = (channel,author,msg) => {
 
 class akinator extends Discord.Command {
 	constructor() {
-        super("akinator", [], "akinator", "start a game of akinator", false);
+        super("akinator", [], "akinator", "start a game of akinator", true);
     }
     message(content, author, channel, guild, message, handler) {
 		const a = async () => {

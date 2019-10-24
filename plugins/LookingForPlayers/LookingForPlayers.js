@@ -56,7 +56,12 @@ module.exports.load = function (client) {
                             }
                         }
                         if (oldMember.voiceChannel && oldMember.voiceChannel.parentID == response.id) {
-                            if (!oldMember.voiceChannel.members.size && oldMember.guild.channels.get(response.id).children.size > 2) oldMember.voiceChannel.delete("empty looking for players voice channel.");
+                            oldMember.voiceChannel.setName("Looking For Players");
+                            const empty = Array.from(oldMember.voiceChannel.parent.children.filter(child => child.type == 'voice' && !child.members.size).values());
+                            empty.pop();
+                            empty.forEach(channel => {
+                                channel.delete("empty LookingForPlayers channel");
+                            })
                         }
                     }
                 });

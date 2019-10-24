@@ -85,7 +85,7 @@ app.post('/dashboard/:guildID/:pluginSlug', checkAuth, async (req, res) => {
     const adminGuilds = guilds.filter(guild => botGuilds.includes(guild.id));
 
     if (plugins.includes(req.pluginSlug) && adminGuilds.filter(g => g.id == req.guildID).length) {
-        require(`./plugins/${req.pluginSlug}/web.js`).put(req.guildID, req.body);
+        await require(`./plugins/${req.pluginSlug}/web.js`).put(req.guildID, req.body);
         res.redirect(`/dashboard/${req.guildID}/${req.pluginSlug}`);
     } else {
         res.redirect("/dashboard");
@@ -99,6 +99,8 @@ app.get('/dashboard/:guildID/:pluginSlug', checkAuth, async (req, res) => {
     if (plugins.includes(req.pluginSlug) && adminGuilds.filter(g => g.id == req.guildID).length) {
         const pluginData = await require(`./plugins/${req.pluginSlug}/web.js`).get(req.guildID);
         res.render(`plugins/${req.pluginSlug}`, {pluginData: pluginData, guildID: req.guildID, pluginSlug:req.pluginSlug, adminGuilds: adminGuilds, loginStatus: !!req.user, userAvatar: req.user ? `https://cdn.discordapp.com/avatars/${req.user.id}/${req.user.avatar}.png` : false, userName: req.user ? req.user.username : false});
+    } else if (req.guildID == "null") {
+        res.render("noguild", {pluginData: {aliases:{}}, guildID: req.guildID, pluginSlug:req.pluginSlug, adminGuilds: adminGuilds, loginStatus: !!req.user, userAvatar: req.user ? `https://cdn.discordapp.com/avatars/${req.user.id}/${req.user.avatar}.png` : false, userName: req.user ? req.user.username : false})
     } else {
         res.redirect("/dashboard");
     }

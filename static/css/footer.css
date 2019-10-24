@@ -12,10 +12,10 @@
     grid-template-columns: auto auto;
 }
 
-.footer h3 div {
+.footer h3 #left {
     text-align: left
 }
 
-.footer h3 a {
+.footer h3 #right {
     text-align: right
 }

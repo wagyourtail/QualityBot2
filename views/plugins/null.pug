@@ -7,10 +7,12 @@ block style
 
 block pluginContent
     .plugins
+        .prefix Prefix: 
+            input(type="text" id="prefix" name="prefix" value=pluginData.prefix)
         each plugin in pluginData.plugins
             .plugin(id= plugin)
                 div(class= "pretty p-switch p-fill")
-                    input(name= plugin type="checkbox" checked=pluginData.enabled.includes(plugin))
+                    input(name= plugin type="checkbox" checked=pluginData.enabled.includes(plugin) disabled=plugin == "Default" && pluginData.enabled.includes(plugin))
                     div(class="state p-success")
                         label
                 a(href=`/dashboard/${guildID}/${plugin}`)= plugin

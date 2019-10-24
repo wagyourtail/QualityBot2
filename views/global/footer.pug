@@ -1,4 +1,8 @@
 .footer
     h3 
-        div Quality Bot | Wagyourtail 2019 
-        a(href="https://github.com/Wagyourtail/QualityBot") GitHub
+        #left Quality Bot | Wagyourtail 2019
+        #right
+            if loginStatus
+                a(href="/logout") Logout
+                =" | "
+            a(href="https://github.com/Wagyourtail/QualityBot") GitHub
