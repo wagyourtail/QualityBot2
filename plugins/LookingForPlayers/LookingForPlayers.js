@@ -14,7 +14,7 @@ class LFPCategory extends Discord.Command {
             handler.database.setGuildPluginData(guild.id, this.plugin, {id:parent});
             reply.addField("Success", `category set to ${guild.channels.get(parent)}`);
         } else {
-            reply.addField("Fail", "channel parent is not a category.");
+            reply.addField("Fail", "channel is not in a category.");
         }
         channel.send(reply);
     }
@@ -61,7 +61,7 @@ module.exports.load = function (client) {
                             empty.pop();
                             empty.forEach(channel => {
                                 channel.delete("empty LookingForPlayers channel");
-                            })
+                            });
                         }
                     }
                 });

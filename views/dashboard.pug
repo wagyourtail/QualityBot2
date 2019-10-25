@@ -44,14 +44,14 @@ html
                                         input(type= "button" class= "button" value="+" onclick=`newAlias('${command}', this)`)
                                 .perms Perms
                                     each perm in pluginData.perms[command].filter(e => Object.keys(pluginData.roles).includes(e))
-                                        .input
-                                            input(class= "perm" type="text" name= `${command}.perms` list="roles" value= `@${pluginData.roles[perm].name.replace('@', '')}` data-lpignore="true")
+                                        .input(style="border: 1px solid green")
+                                            input(class= "perm" type="text" name= `${command}.perms` list="roles" value= `@${pluginData.roles[perm].name.replace('@', '')}` onkeyup="changeColor(this)" onchange="changeColor(this)" onpaste="changeColor(this)" data-lpignore="true" style=`color: #${pluginData.roles[perm].color};`)
                                             input(type= "button" class= "button" value="x" onclick="this.parentNode.remove()")
                                     .input
-                                        input(class= "perm" type="text" name= `${command}.perms` list="roles" data-lpignore="true")
+                                        input(class= "perm" type="text" name= `${command}.perms` list="roles" onkeyup="changeColor(this)" onchange="changeColor(this)" onpaste="changeColor(this)" data-lpignore="true")
                                         input(type= "button" class= "button" value="+" onclick=`newPerm('${command}', this)`)
                             datalist(id= "roles")
                                 each role, id in pluginData.roles
-                                    option(style=`#${role.color}`)= `@${role.name.replace('@', '')}`
+                                    option(style=`color: #${role.color}`)= `@${role.name.replace('@', '')}`
         include global/footer.pug
         script(src= "/static/js/dashboard.js")

@@ -16,6 +16,10 @@ class Client extends Discord.Client {
         this.plugins.set(plugin.name, plugin);
     }
     checkRoles(member, commandPerms) {
+        if (commandPerms.includes("@everyone")) return true;
+        for (const perm of commandPerms) {
+            if (member.roles.has(perm)) return true;
+        }
         return false;
     }
     handle(msg) {
