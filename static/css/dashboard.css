@@ -68,14 +68,14 @@ body {
 .saveBar {
     display: grid;
     background-color: white;
-    grid-template-columns: 200px auto 100px 100px 20px;
+    grid-template-columns: min-content auto 100px 100px 20px;
     margin-top: 0px;
     padding: 15px 0px;
 }
 
 .saveBar h1 {
     margin: 0;
-    padding-left: 20px;
+    padding: 0px 20px;
 }
 
 #reset {

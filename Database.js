@@ -2,6 +2,14 @@
 const redis = require('redis');
 const db = redis.createClient({db: 1});
 
+module.exports.guildLength = function() {
+    return new Promise((resolve, reject) => {
+        db.scard("Guilds", (err, reply) => {
+            resolve(reply);
+        });
+    });
+}
+
 module.exports.getGuilds = function() {
     return new Promise((resolve, reject) => {
         db.smembers("Guilds", (error, reply) => {

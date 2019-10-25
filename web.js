@@ -68,8 +68,8 @@ function checkAuth(req, res, next) {
     res.redirect('/');
 }
 
-app.get('/', (req, res) => {
-    res.render('index', {loginStatus: !!req.user, userAvatar: req.user ? `https://cdn.discordapp.com/avatars/${req.user.id}/${req.user.avatar}.png` : false, userName: req.user ? req.user.username : false});
+app.get('/', async (req, res) => {
+    res.render('index', {guildLength: await database.guildLength(), loginStatus: !!req.user, userAvatar: req.user ? `https://cdn.discordapp.com/avatars/${req.user.id}/${req.user.avatar}.png` : false, userName: req.user ? req.user.username : false});
 });
 
 app.get('/dashboard', checkAuth, async (req, res) => {
@@ -98,9 +98,9 @@ app.get('/dashboard/:guildID/:pluginSlug', checkAuth, async (req, res) => {
     const adminGuilds = guilds.filter(guild => botGuilds.includes(guild.id));
     if (plugins.includes(req.pluginSlug) && adminGuilds.filter(g => g.id == req.guildID).length) {
         const pluginData = await require(`./plugins/${req.pluginSlug}/web.js`).get(req.guildID);
-        res.render(`plugins/${req.pluginSlug}`, {pluginData: pluginData, guildID: req.guildID, pluginSlug:req.pluginSlug, adminGuilds: adminGuilds, loginStatus: !!req.user, userAvatar: req.user ? `https://cdn.discordapp.com/avatars/${req.user.id}/${req.user.avatar}.png` : false, userName: req.user ? req.user.username : false});
+        res.render(`plugins/${req.pluginSlug}`, {guildLength: await database.guildLength(), pluginData: pluginData, guildID: req.guildID, pluginSlug:req.pluginSlug, adminGuilds: adminGuilds, loginStatus: !!req.user, userAvatar: req.user ? `https://cdn.discordapp.com/avatars/${req.user.id}/${req.user.avatar}.png` : false, userName: req.user ? req.user.username : false});
     } else if (req.guildID == "null") {
-        res.render("noguild", {pluginData: {aliases:{}}, guildID: req.guildID, pluginSlug:req.pluginSlug, adminGuilds: adminGuilds, loginStatus: !!req.user, userAvatar: req.user ? `https://cdn.discordapp.com/avatars/${req.user.id}/${req.user.avatar}.png` : false, userName: req.user ? req.user.username : false})
+        res.render("noguild", {guildLength: await database.guildLength(), pluginData: {aliases:{}}, guildID: req.guildID, pluginSlug:req.pluginSlug, adminGuilds: adminGuilds, loginStatus: !!req.user, userAvatar: req.user ? `https://cdn.discordapp.com/avatars/${req.user.id}/${req.user.avatar}.png` : false, userName: req.user ? req.user.username : false})
     } else {
         res.redirect("/dashboard");
     }
