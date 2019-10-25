@@ -17,7 +17,7 @@ redis-cli
 >exit
 
 nano bot.js #edit your client id
-node bot.js
+startnode.sh #this contains a while loop so if the bot crashes it'll restart.
 # or if you installed pm2
 pm2 start bot.js
 ```
