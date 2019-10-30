@@ -141,3 +141,60 @@ module.exports.getClientSecret = function(clientID) {
         });
     });
 }
+
+
+//these functions are specifically for the MemberRank plugin.
+
+module.exports.guildMemberAddEXP = function(guildID, plugin, member, increment) {
+    db.zadd(`Guilds:${guildID}:Plugins:${plugin}:Data:EXPList`, "INCR", increment, member);
+}
+
+module.exports.getRanks = function(guildID, plugin, start, count) {
+    return new Promise((resolve, reject) => {
+        //ZREVRANGEBYSCORE myset +inf -inf WITHSCORES LIMIT 0 1
+        db.zrevrangebyscore(`Guilds:${guildID}:Plugins:${plugin}:Data:EXPList`, "+inf", "-inf", "WITHSCORES", "LIMIT", start, count, (err, res) => {
+            const result = []
+            for(let i = 0; i < res.length; i++) {
+                result.push({member:res[2*i], score:res[2*i+1]});
+            }
+            resolve(result);
+        });
+    });
+}
+
+module.exports.getUserCount = function(guildID, plugin) {
+    return new Promise((resolve, reject) => {
+        db.zcard(`Guilds:${guildID}:Plugins:${plugin}:Data:EXPList`, (err, res) => {
+            resolve(res);
+        });
+    });
+}
+
+module.exports.deleteUser = function(guildID, plugin, member) {
+    db.zrem(`Guilds:${guildID}:Plugins:${plugin}:Data:EXPList`, member);
+    db.hdel(`Guilds:${guildID}:Plugins:${plugin}:Data:MsgTime`, member);
+}
+
+module.exports.getGuildMemberEXP = function(guildID, plugin, member) {
+    return new Promise((resolve, reject) => {
+        db.zrevrank(`Guilds:${guildID}:Plugins:${plugin}:Data:EXPList`, member, (err, rank) => {
+            db.zscore(`Guilds:${guildID}:Plugins:${plugin}:Data:EXPList`, member, (err, score) => {
+                if (score !== null) resolve({rank:rank, score:score});
+                else resolve({rank: false, score:0});
+            });
+        });
+    });
+}
+
+module.exports.getGuildMemberLastMessage = function(guildID, plugin, member) {
+    return new Promise((resolve, reject) => {
+        db.hget(`Guilds:${guildID}:Plugins:${plugin}:Data:MsgTime`, member, (err, reply) => {
+            if (reply) resolve(reply);
+            else resolve(0);
+        });
+    });
+}
+
+module.exports.setGuildMemberLastMessage = function(guildID, plugin, member, time) {
+    db.hset(`Guilds:${guildID}:Plugins:${plugin}:Data:MsgTime`, member, time);
+}

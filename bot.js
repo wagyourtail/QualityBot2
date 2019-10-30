@@ -10,6 +10,7 @@ if (!fs.existsSync("./plugins")) {
 const folders = fs.readdirSync("./plugins");
 for (const plugin of folders) {
     require(`./plugins/${plugin}/${plugin}.js`).load(Client);
+    //console.log(plugin);
     if (fs.existsSync(`./plugins/${plugin}/web/views`) && !fs.existsSync(`./views/plugins/${plugin}`)) {
         fs.symlinkSync(fs.realpathSync(`./plugins/${plugin}/web/views`), `./views/plugins/${plugin}`);
     }

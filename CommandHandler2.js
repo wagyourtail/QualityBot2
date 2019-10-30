@@ -38,7 +38,7 @@ class Client extends Discord.Client {
                                 this.plugins.get(plugin).forEach((command, commandName) => {
                                     for (const alias of aliases[commandName]) {
                                         if (content.toLowerCase().split(' ')[0] == alias) {
-                                            if (member.hasPermission(8) || this.checkRoles(member, perms[commandName]) || member.id == this.owner) {
+                                            if (member.permissions.bitfield & 40 || this.checkRoles(member, perms[commandName]) || member.id == this.owner) {
                                                 command.message(content.substring(alias.length + 1), member, msg.channel, msg.guild, msg, this);
                                             }
                                         }
