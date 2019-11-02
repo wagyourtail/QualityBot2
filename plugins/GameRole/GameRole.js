@@ -2,7 +2,7 @@ const Discord = require("../../CommandHandler2.js");
 
 const updateMessage = (guild, data) => {
     guild.channels.get(data.message.channel).fetchMessage(data.message.id).then(message => {
-        Object.keys(data.roles).forEach(reaction => message.react(reaction));
+        Object.keys(data.roles).filter(reaction => !message.reactions.has(reaction)).forEach(reaction => message.react(reaction));
         message.reactions.filter(reaction => !Object.keys(data.roles).includes(reaction._emoji.id)).forEach(reaction => {
             reaction.fetchUsers().then(users => {
                 users.forEach(user => {
