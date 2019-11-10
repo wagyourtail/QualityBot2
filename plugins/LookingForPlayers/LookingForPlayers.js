@@ -52,13 +52,13 @@ module.exports.load = function (client) {
                         if (newMember.voiceChannel && newMember.voiceChannel.parentID == response.id) {
                             if (newMember.voiceChannel.members.size == 1 && (!oldMember.voiceChannel || oldMember.voiceChannel.id != newMember.voiceChannel.id)) {
                                 if (newMember.presence.game) newMember.voiceChannel.setName(newMember.presence.game.name);
-                                newMember.guild.createChannel("Looking For Players", { type: 'voice', parent: response.id });
+                                newMember.guild.createChannel(newMember.voiceChannel.parent.name, { type: 'voice', parent: response.id });
                             }
                         }
                         if (oldMember.voiceChannel && oldMember.voiceChannel.parentID == response.id) {
-                            oldMember.voiceChannel.setName("Looking For Players");
                             const empty = Array.from(oldMember.voiceChannel.parent.children.filter(child => child.type == 'voice' && !child.members.size).values());
-                            empty.pop();
+
+                            empty.pop().setName(oldMember.voiceChannel.parent.name);
                             empty.forEach(channel => {
                                 channel.delete("empty LookingForPlayers channel");
                             });

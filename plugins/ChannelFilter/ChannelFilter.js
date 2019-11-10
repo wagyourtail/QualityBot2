@@ -2,7 +2,7 @@ const Discord = require("../../CommandHandler2.js");
 
 class ChannelFilter extends Discord.Command {
     constructor() {
-        super("channelfilter", [], "channelfilter list **channel**\nchannelfilter add **channel** **/regex/**\nchannelfilter del **channel** **/regex/**", "filter chat by regex.\n**/regex/** is a regular expression or `attachments` to delete messages with attachments.\n**channel** is a channel resolvable or `all` for all channels.");
+        super("channelfilter", [], "channelfilter list **channel**\nchannelfilter add **channel** **/regex/**\nchannelfilter del **channel** **/regex/**", "filter chat by [regex](https://regexr.com/).\n**/regex/** is a regular expression or `attachments` to delete messages with attachments.\n**channel** is a channel resolvable or `all` for all channels.");
     }
     message(content, member, channel, guild, message, handler) {
         switch(content.split(" ")[0]) {

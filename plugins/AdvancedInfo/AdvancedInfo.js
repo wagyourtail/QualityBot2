@@ -6,16 +6,15 @@ class AIListRoles extends Discord.Command {
     }
     message(content, member, channel, guild, message, handler) {
         let roles = [];
+        let size = guild.roles.size;
         guild.roles.forEach(role => {
-            if (roles.join("\n").length >= 2048) {
-                channel.send(new Discord.RichEmbed().setDescription(roles.slice(0,roles.length-1).join("\n")));
-                roles = [roles[roles.length-1]];
-            }
-            roles.push(`${role}: ${role.id}`);
+            roles.push(`**${role.position}.** ${role}: ${role.id}`);
 		});
-        if (roles.join("\n").length >= 2048) {
-            channel.send(new Discord.RichEmbed().setDescription(roles.slice(0,roles.length-1).join("\n")));
-            roles = [roles[roles.length-1]];
+        roles.sort((a, b) => a.match(/(\d+)/)[1] - b.match(/(\d+)/)[1]);
+        while (roles.join("\n").length >= 2048) {
+            for (let i = roles.length; roles.slice(0,i).join("\n").length >= 2048; i--) {}
+            channel.send(new Discord.RichEmbed().setDescription(roles.slice(0,i).join("\n")));
+            roles.slice(i);
         }
         channel.send(new Discord.RichEmbed().setDescription(roles.join("\n")));
     }
