@@ -12,9 +12,12 @@ class AIListRoles extends Discord.Command {
 		});
         roles.sort((a, b) => a.match(/(\d+)/)[1] - b.match(/(\d+)/)[1]);
         while (roles.join("\n").length >= 2048) {
-            for (let i = roles.length; roles.slice(0,i).join("\n").length >= 2048; i--) {}
+            let i = roles.length;
+             while (roles.slice(0,i).join("\n").length >= 2048) {
+                 i--;
+             }
             channel.send(new Discord.RichEmbed().setDescription(roles.slice(0,i).join("\n")));
-            roles.slice(i);
+            roles = roles.slice(i);
         }
         channel.send(new Discord.RichEmbed().setDescription(roles.join("\n")));
     }
