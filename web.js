@@ -23,7 +23,7 @@ database.getClientSecret('520769818870415380').then(secret => {
     passport.use(new Strategy({
         clientID: '520769818870415380',
         clientSecret: secret,
-        callbackURL: 'https://qualitybot.wys1.root.sx/callback',
+        callbackURL: 'https://qualitybot.xyz/callback',
         scope: scopes
     }, (accessToken, refreshToken, profile, done) => {
         process.nextTick(() => {
