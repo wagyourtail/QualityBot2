@@ -210,27 +210,26 @@ module.exports.load = function (client) {
         client.database.getGuild(newMessage.guild.id, client.prefix).then((response) => {
             if (response.enabled.includes("ModTools")) {
                 client.database.getGuildPluginData(newMessage.guild.id, "ModTools", {logChannel:null, muteRole:null}).then((response) => {
-                    if (response.logChannel) {
+                    if (response.logChannel && oldMessage.content != newMessage.content) {
                         if (newMessage.guild.channels.has(response.logChannel)) {
                             const reply = new Discord.RichEmbed().setAuthor(newMessage.author.tag, newMessage.author.displayAvatarURL).setDescription(`${newMessage.author}, Updated A Message in ${newMessage.channel}`).setTimestamp(newMessage.createdTimestamp);
 
                             if (oldMessage.content.length > 1000) {
-                                reply.addField("From:", "\u200b", false);
-                                for (const i of [`\u200b${oldMessage.content.substring(0, 1000)}`, `\u200b${oldMessage.content.substring(1000)}`]) {
-                                    reply.addField("\u200b", i, false);
-                                }
+                                reply.addField("From:", `\u200b${oldMessage.content.substring(0, 1000)}`, false);
+                                reply.addField("\u200b", `\u200b${oldMessage.content.substring(1000)}`, false);
                             } else {
                                 reply.addField("From: ", `\u200b${oldMessage.content}`, false);
                             }
 
                             if (newMessage.content.length > 1000) {
-                                reply.addField("To: ", "\u200b", false);
-                                for (const i of [`\u200b${newMessage.content.substring(0, 1000)}`, `\u200b${newMessage.content.substring(1000)}`]) {
-                                    reply.addField("\u200b", i, false);
-                                }
+                                reply.addField("To: ", `\u200b${newMessage.content.substring(0, 1000)}`, false);
+                                reply.addField("\u200b", `\u200b${newMessage.content.substring(1000)}`, false);
                             } else {
                                 reply.addField("To: ", `\u200b${newMessage.content}`, false);
                             }
+                            const attachments = Array.from(newMessage.attachments);
+                            console.log(attachments)
+                            if (attachments.length) reply.addField("Attachments: ", attachments.map(e => e[1].proxyURL).join("\n"));
                             newMessage.guild.channels.get(response.logChannel).send(reply);
                         }
                     }
@@ -246,16 +245,15 @@ module.exports.load = function (client) {
                 client.database.getGuildPluginData(message.guild.id, "ModTools", {logChannel:null, muteRole:null}).then((response) => {
                     if (response.logChannel) {
                         if (message.guild.channels.has(response.logChannel)) {
-                            const reply = new Discord.RichEmbed().setAuthor(message.author.tag, message.author.displayAvatarURL).setDescription(`${message.author}, Deleted A Message in ${message.channel}`).setTimestamp(message.createdTimestamp);
+                            const reply = new Discord.RichEmbed().setAuthor(message.author.tag, message.author.displayAvatarURL).setDescription(`A message was deleted in ${message.channel}`).setTimestamp(message.createdTimestamp);
                             if (message.content.length > 1000) {
-                                reply.addField("Content: ", "\u200b", false);
-                                for (const i of [`\u200b${message.content.substring(0, 1000)}`, `\u200b${message.content.substring(1000)}`]) {
-                                    reply.addField("\u200b", i, false);
-                                }
+                                reply.addField("Content: ", `\u200b${message.content.substring(0, 1000)}`, false);
+                                reply.addField("\u200b", `\u200b${message.content.substring(1000)}`, false);
                             } else {
-                                reply.addField("Content: ", message.content, false);
+                                reply.addField("Content: ", `\u200b${message.content}`, false);
                             }
-
+                            const attachments = Array.from(message.attachments);
+                            if (attachments.length) reply.addField("Attachments: ", attachments.map(e => e[1].proxyURL).join("\n"));
                             message.guild.channels.get(response.logChannel).send(reply);
                         }
                     }

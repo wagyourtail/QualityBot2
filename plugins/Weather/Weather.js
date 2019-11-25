@@ -9,8 +9,16 @@ class weatherCl extends Discord.Command {
 		weather.find({search: content, degreeType: 'C'}, (err,res) => {
 			if (res && res[0]) {
 				channel.send(new Discord.RichEmbed().setTitle(`Weather: ${res[0].location.name}`).setDescription(`${Math.abs(parseFloat(res[0].location.lat))}°${parseFloat(res[0].location.lat) > 0 ? "N" : "S"}, ${Math.abs(parseFloat(res[0].location.long))}°${parseFloat(res[0].location.lat) > 0 ? "W" : "E"}`).addField("Temperature",`${Math.round(parseFloat(res[0].current.temperature)*1.8+32)}°F (${res[0].current.temperature}°C)\nFeels Like: ${parseFloat(res[0].current.feelslike)*1.8+32}°F (${res[0].current.feelslike}°C)\nHumidity:${res[0].current.humidity}%`, true).addField("Wind",res[0].current.winddisplay,true).setThumbnail(res[0].current.imageUrl))
+                    .then(mes => {
+                        mes.delete(20 * 1000);
+                        message.delete(20 * 1000);
+                    });
 			} else {
-                channel.send(new Discord.RichEmbed().setTitle("Weather: Failed").setDescription("Location did not parse."));
+                channel.send(new Discord.RichEmbed().setTitle("Weather: Failed").setDescription("Location did not parse."))
+                    .then(mes => {
+                        mes.delete(20 * 1000);
+                        message.delete(20 * 1000);
+                    });
             }
 		});
 	}
