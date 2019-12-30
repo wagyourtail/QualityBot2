@@ -26,6 +26,13 @@ class MuteRole extends Discord.Command {
             else response.muteRole = guild.roles.has(match[1]) ? match[1] : null;
             channel.send(new Discord.RichEmbed().setTitle("Mute Role").setDescription(`Mute Role set to ${response.muteRole ? guild.roles.get(match[1]) : "`none`"}.`));
             handler.database.setGuildPluginData(guild.id, this.plugin, response);
+            if (response.muteRole) {
+                Array.from(guild.channels).filter(e => e[1].type != "voice").forEach(e => {
+                    let overwrite = true;
+                    if (e[1].permissionOverwrites.has(response.muteRole)) overwrite = !(e[1].permissionOverwrites.get(response.muteRole).allow & 2048);
+                    if (overwrite) e[1].overwritePermissions(response.muteRole, {SEND_MESSAGES: false}, "auto update muterole perms.");
+                });
+            }
         });
     }
 }
@@ -212,7 +219,7 @@ module.exports.load = function (client) {
                 client.database.getGuildPluginData(newMessage.guild.id, "ModTools", {logChannel:null, muteRole:null}).then((response) => {
                     if (response.logChannel && oldMessage.content != newMessage.content) {
                         if (newMessage.guild.channels.has(response.logChannel)) {
-                            const reply = new Discord.RichEmbed().setAuthor(newMessage.author.tag, newMessage.author.displayAvatarURL).setDescription(`${newMessage.author}, Updated A Message in ${newMessage.channel}`).setTimestamp(newMessage.createdTimestamp);
+                            const reply = new Discord.RichEmbed().setAuthor(newMessage.author.tag, newMessage.author.displayAvatarURL).setDescription(`${newMessage.author}, Updated A Message in ${newMessage.channel}`).setTimestamp(newMessage.createdTimestamp).setTitle("Message Updated").setURL(newMessage.url);
 
                             if (oldMessage.content.length > 1000) {
                                 reply.addField("From:", `\u200b${oldMessage.content.substring(0, 1000)}`, false);
@@ -245,7 +252,7 @@ module.exports.load = function (client) {
                 client.database.getGuildPluginData(message.guild.id, "ModTools", {logChannel:null, muteRole:null}).then((response) => {
                     if (response.logChannel) {
                         if (message.guild.channels.has(response.logChannel)) {
-                            const reply = new Discord.RichEmbed().setAuthor(message.author.tag, message.author.displayAvatarURL).setDescription(`A message was deleted in ${message.channel}`).setTimestamp(message.createdTimestamp);
+                            const reply = new Discord.RichEmbed().setAuthor(message.author.tag, message.author.displayAvatarURL).setDescription(`A message was deleted in ${message.channel}`).setTimestamp(message.createdTimestamp).setTitle("Message Deleted");
                             if (message.content.length > 1000) {
                                 reply.addField("Content: ", `\u200b${message.content.substring(0, 1000)}`, false);
                                 reply.addField("\u200b", `\u200b${message.content.substring(1000)}`, false);
@@ -262,4 +269,19 @@ module.exports.load = function (client) {
         });
     });
 
+    client.on("channelCreate", (channel) => {
+        if (channel.guild && channel.type != "voice") {
+            client.database.getGuild(channel.guild.id, client.prefix).then((response) => {
+                if (response.enabled.includes("ModTools")) {
+                    client.database.getGuildPluginData(channel.guild.id, "ModTools", {logChannel:null, muteRole:null}).then((response) => {
+                        if (response.muteRole) {
+                            let overwrite = true;
+                            if (channel.permissionOverwrites.has(response.muteRole)) overwrite = !(channel.permissionOverwrites.get(response.muteRole).allow & 2048);
+                            if (overwrite) channel.overwritePermissions(response.muteRole, {SEND_MESSAGES: false}, "auto update muterole perms.");
+                        }
+                    });
+                }
+            });
+        }
+    });
 }
