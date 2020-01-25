@@ -123,7 +123,7 @@ class MRTop extends Discord.Command {
         super("mrtop", [], "mrtop `page`", "top ranks.\n`page` is optional.", true);
     }
     message(content, member, channel, guild, message, handler) {
-        content = parseInt(content) ? parseInt(content) : 0;
+        content = parseInt(content) ? parseInt(content) - 1 : 0;
         if (content < 0) content = 0;
         handler.database.getRanks(guild.id, this.plugin, content*10, 10).then(async (members) => {
             const reply = new Discord.RichEmbed()
@@ -131,9 +131,11 @@ class MRTop extends Discord.Command {
                 .addField("Page: ", `${content+1}/${Math.ceil((await handler.database.getUserCount(guild.id, this.plugin))/10)}`);
             let i = content*10;
             const ranks = []
-            for (const member of members) {
-                if (guild.members.has(member.member)) {
-                    ranks.push(`**${++i}**: ${guild.members.get(member.member)}: ${member.score}`);
+            for (const memb of members) {
+                if (guild.members.has(memb.member)) {
+                    ranks.push(`**${++i}**: ${guild.members.get(memb.member)}: ${memb.score}`);
+                } else {
+                    handler.database.deleteUser(guild.id, "MemberRank", memb.member);
                 }
             }
             reply.setDescription(ranks.join('\n'));
@@ -157,13 +159,15 @@ function updateMember(member, guild, client) {
     return new Promise((resolve, reject) => {
         client.database.getGuildPluginData(guild.id, "MemberRank", {static:{}, dynamic:{}}).then(async (ranks) => {
             const userRank = await client.database.getGuildMemberEXP(guild.id, "MemberRank", member.id);
+            ++userRank.rank;
             for (const [rank, role] of Object.entries(ranks.static)) {
                 if (userRank.rank <= rank && !member.roles.has(role) && guild.roles.has(role)) member.addRole(role);
                 if (userRank.rank > rank && member.roles.has(role) && guild.roles.has(role)) member.removeRole(role);
             }
+            const userCount = await client.database.getUserCount(guild.id, "MemberRank");
             for (const [rank, role] of Object.entries(ranks.dynamic)) {
-                if (userRank.rank <= (guild.members.size * rank / 100) && !member.roles.has(role) && guild.roles.has(role)) member.addRole(role);
-                if (userRank.rank > (guild.members.size * rank / 100) && member.roles.has(role) && guild.roles.has(role)) member.removeRole(role);
+                if (userRank.rank <= (userCount * rank / 100) && !member.roles.has(role) && guild.roles.has(role)) member.addRole(role);
+                if (userRank.rank > (userCount * rank / 100) && member.roles.has(role) && guild.roles.has(role)) member.removeRole(role);
             }
             resolve(userRank.rank);
         });
@@ -182,7 +186,7 @@ module.exports.load = function (client) {
                         client.database.guildMemberAddEXP(msg.guild.id, "MemberRank", msg.author.id, getPoints(time));
                         client.database.setGuildMemberLastMessage(msg.guild.id, "MemberRank", msg.author.id, msg.createdTimestamp);
                         updateMember(msg.member, msg.guild, client).then(async (rank) => {
-                            const member = (await client.database.getRanks(msg.guild.id, "MemberRank", rank + 1, 1))[0];
+                            const member = (await client.database.getRanks(msg.guild.id, "MemberRank", rank, 1))[0];
                             if (member && msg.guild.members.has(member.member)) updateMember(msg.guild.members.get(member.member), msg.guild, client);
                             else client.database.deleteUser(msg.guild.id, "MemberRank", member.member);
                         });

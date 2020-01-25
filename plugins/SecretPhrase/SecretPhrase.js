@@ -12,10 +12,19 @@ class SecretPhrase extends Discord.Command {
                         .setTitle("SecretPhrase: List");
                     const mappings = [];
                     for (const [key, value] of Object.entries(response.roles)) {
-                        mappings.push(`\`${key}\` -> ${guild.roles.get(value)}`);
+                        if (guild.roles.has(value)) {
+                            mappings.push(`\`${key.toLowerCase()}\` -> ${guild.roles.get(value)}`);
+                            if (key.toLowerCase() != key) {
+                                delete response.roles[key];
+                                response.roles[key.toLowerCase()] = value;
+                            }
+                        } else {
+                            delete response.roles[key];
+                        }
                     }
                     if (mappings.length) reply.setDescription(mappings.join('\n'));
                     channel.send(reply);
+                    handler.database.setGuildPluginData(guild.id, this.plugin, response);
                 });
                 break;
             case "add":
@@ -24,8 +33,8 @@ class SecretPhrase extends Discord.Command {
                         .setTitle("SecretPhrase: Add");
                     const matches = content.match(/[^\d]*?(\d+)[^"]*?"([^\"]+)/);
                     if (matches && guild.roles.has(matches[1])) {
-                        response.roles[matches[2]] = matches[1];
-                        reply.addField("Success", `\`${matches[2]}\` -> ${guild.roles.get(matches[1])}`);
+                        response.roles[matches[2].toLowerCase()] = matches[1];
+                        reply.addField("Success", `\`${matches[2].toLowerCase()}\` -> ${guild.roles.get(matches[1])}`);
                     } else {
                         reply.addField("Fail", "failed to parse role/phrase");
                     }
@@ -40,8 +49,8 @@ class SecretPhrase extends Discord.Command {
                         .setTitle("SecretPhrase: Del");
                     const matches = content.match(/[^"]*?"([^\"]+)/);
                     if (matches) {
-                        delete response.roles[matches[1]];
-                        reply.addField("Success", `\`${matches[1]}\` no longer assigned.`);
+                        delete response.roles[matches[1].toLowerCase()];
+                        reply.addField("Success", `\`${matches[1].toLowerCase()}\` no longer assigned.`);
                     } else {
                         reply.addField("Fail", "failed to parse **phrase** or is not assigned.");
                     }
@@ -69,8 +78,8 @@ module.exports.load = function (client) {
         client.database.getGuild(message.guild.id, client.prefix).then((response) => {
             if (response.enabled.includes("SecretPhrase")) {
                 client.database.getGuildPluginData(message.guild.id, "SecretPhrase", {roles:{}}).then(data => {
-                    if (data.roles[message.content]) {
-                        message.member.addRole(data.roles[message.content]);
+                    if (data.roles[message.content.toLowerCase()]) {
+                        message.member.addRole(data.roles[message.content.toLowerCase()]);
                     }
                 });
             }

@@ -153,10 +153,15 @@ module.exports.getRanks = function(guildID, plugin, start, count) {
     return new Promise((resolve, reject) => {
         //ZREVRANGEBYSCORE myset +inf -inf WITHSCORES LIMIT 0 1
         db.zrevrangebyscore(`Guilds:${guildID}:Plugins:${plugin}:Data:EXPList`, "+inf", "-inf", "WITHSCORES", "LIMIT", start, count, (err, res) => {
+            if (!res) {
+                console.log("rev range failed?", start, count);
+                return reject()
+            };
             const result = []
-            for(let i = 0; i < res.length; i++) {
-                result.push({member:res[2*i], score:res[2*i+1]});
+            for(let i = 0; i < res.length; i += 2) {
+                result.push({member:res[i], score:res[i+1]});
             }
+            console.log(result);
             resolve(result);
         });
     });
