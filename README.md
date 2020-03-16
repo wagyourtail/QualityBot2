@@ -7,7 +7,8 @@
 ```bash
 apt install redis
 git clone https://github.com/wagyourtail/QualityBot2.git
-npm install
+
+#get nodejs.
 
 #add your bot token and secret to your database or just how login works in bot.js
 redis-cli
