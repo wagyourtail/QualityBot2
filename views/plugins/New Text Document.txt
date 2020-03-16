@@ -1,0 +1,12 @@
+extends ../dashboard.pug
+
+block style
+    link(rel= "stylesheet" href= "https://cdn.jsdelivr.net/npm/pretty-checkbox@3.0/dist/pretty-checkbox.min.css")
+    style
+        include PluginName.css
+
+block description
+    p plugin description blah blah blah.
+
+block pluginContent
+    
