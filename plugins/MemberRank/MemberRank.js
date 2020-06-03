@@ -161,13 +161,13 @@ function updateMember(member, guild, client) {
             const userRank = await client.database.getGuildMemberEXP(guild.id, "MemberRank", member.id);
             ++userRank.rank;
             for (const [rank, role] of Object.entries(ranks.static)) {
-                if (userRank.rank <= rank && !member.roles.has(role) && guild.roles.has(role)) member.addRole(role);
-                if (userRank.rank > rank && member.roles.has(role) && guild.roles.has(role)) member.removeRole(role);
+                if (userRank.rank <= rank && guild.roles.has(role) && !member.roles.has(role)) member.addRole(role);
+                if (userRank.rank > rank && guild.roles.has(role) && member.roles.has(role)) member.removeRole(role);
             }
             const userCount = await client.database.getUserCount(guild.id, "MemberRank");
             for (const [rank, role] of Object.entries(ranks.dynamic)) {
-                if (userRank.rank <= (userCount * rank / 100) && !member.roles.has(role) && guild.roles.has(role)) member.addRole(role);
-                if (userRank.rank > (userCount * rank / 100) && member.roles.has(role) && guild.roles.has(role)) member.removeRole(role);
+                if (userRank.rank <= (userCount * rank / 100) && guild.roles.has(role) && !member.roles.has(role)) member.addRole(role);
+                if (userRank.rank > (userCount * rank / 100) && guild.roles.has(role) && member.roles.has(role)) member.removeRole(role);
             }
             resolve(userRank.rank);
         });

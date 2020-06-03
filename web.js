@@ -40,7 +40,7 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use('/static',express.static('static'));
+app.use('/static', express.static('static'));
 
 app.param('guildID', (req, res, next, guildID) => {
     req.guildID = guildID;

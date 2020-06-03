@@ -37,6 +37,31 @@ class MuteRole extends Discord.Command {
     }
 }
 
+class Warn extends Discord.Command {
+    constructor() {
+        super("warn", [], "warn **@person** `reason`", "warn people when they are out of line")
+    }
+    message(content, member, channel, guild, message, handler) {
+        const match = content.match(/[^\d]*(\d+)(?:$|.+?\s*(.*))/);
+        if (match) {
+            if (guild.members.has(match[1])) {
+                const reply = new Discord.RichEmbed().setTitle("Warn").setDescription(`Warn ${guild.members.get(match[1])}`);
+                if (match[2]) reply.addField("Reason: ", match[2]);
+                const mention = guild.members.get(match[1]).toString();
+                const tag = guild.members.get(match[1]).user.tag;
+                channel.send(reply);
+                handler.database.getGuildPluginData(guild.id, this.plugin, {logChannel:null, muteRole:null}).then((response) => {
+                    if (response.logChannel && guild.channels.has(response.logChannel)) guild.channels.get(response.logChannel).send(reply.setDescription(`${member} Warned ${mention} (**${tag}**).`));
+                });
+            } else {
+                channel.send(new Discord.RichEmbed().setTitle("Kick").setDescription(`Failed to kick as \`${match[1]}\` not found.`));
+            }
+        } else {
+            channel.send(new Discord.RichEmbed().setTitle("Kick").setDescription("Failed to parse message."));
+        }
+    }
+}
+
 class Mute extends Discord.Command {
     constructor() {
         super("mute", [], "mute **@person** **time** `reason`", "mute people if muterole is set.\n**@person** is required and must be a mention (or user id).\n`reason` optional reason for mute.");
@@ -205,6 +230,7 @@ class ModTools extends Discord.Plugin {
         this.addCommand(new Kick());
         this.addCommand(new Ban());
         this.addCommand(new UnBan());
+        this.addCommand(new Warn());
     }
 }
 

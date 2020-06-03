@@ -3,7 +3,7 @@ const Discord =require('../../DiscordAPI.js');
 
 module.exports.get = function(guildID) {
     return new Promise(async (res, rej) => {
-        const data = await db.getGuildPluginAliasesAndPerms(guildID, "ModTools", {"logchannel":["logchannel"], "muterole":["muterole"], "mute":["mute"], "unmute":["unmute"], "prune":["prune"], "kick":["kick"], "ban":["ban"], "unban":["unban"]}, {"logchannel":[], "muterole":[], "mute":[], "unmute":[], "prune":[], "kick":[], "ban":[], "unban":[]});
+        const data = await db.getGuildPluginAliasesAndPerms(guildID, "ModTools", {"logchannel":["logchannel"], "muterole":["muterole"], "mute":["mute"], "unmute":["unmute"], "prune":["prune"], "warn":["warn"], "kick":["kick"], "ban":["ban"], "unban":["unban"]}, {"logchannel":[], "muterole":[], "mute":[], "unmute":[], "prune":[], "warn":[], "kick":[], "ban":[], "unban":[]});
         data.roles = await Discord.getGuildRoles(guildID);
         res(data);
     });
