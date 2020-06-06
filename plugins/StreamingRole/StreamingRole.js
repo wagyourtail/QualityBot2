@@ -31,11 +31,11 @@ module.exports.load = function(client) {
     client.on('presenceUpdate', (oldMember, newMember) => {
         client.database.getGuild(newMember.guild.id, client.prefix).then(response => {
             if (response.enabled.includes("StreamingRole")) {
-                if (newMember.presence.game && newMember.presence.game.streaming) {
+                if (newMember.presence.game?.streaming) {
                     client.database.getGuildPluginData(newMember.guild.id, "StreamingRole", {id:null}).then(response => {
                         if (response.id) newMember.addRole(response.id, "Streaming");
                     });
-                } else if (oldMember.presence.game && oldMember.presence.game.streaming) {
+                } else if (oldMember.presence.game?.streaming) {
                     client.database.getGuildPluginData(newMember.guild.id, "StreamingRole", {id:null}).then(response => {
                         if (response.id) newMember.removeRole(response.id, "No Longer Streaming");
                     });

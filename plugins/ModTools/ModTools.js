@@ -5,11 +5,26 @@ class LogChannel extends Discord.Command {
         super("logchannel", [], "logchannel **#channel**", "set channel for logging, \n**channel** is required (or dont type it to disable).", false);
     }
     message(content, member, channel, guild, message, handler) {
-        handler.database.getGuildPluginData(guild.id, this.plugin, {logChannel:null, muteRole:null}).then((response) => {
+        handler.database.getGuildPluginData(guild.id, this.plugin, {logChannel:null, muteRole:null, logChanges:false}).then((response) => {
             const match = content.match(/[^\d]*(\d+)/);
             if (!match) response.logChannel = null;
             else response.logChannel = match[1];
             channel.send(new Discord.RichEmbed().setTitle("Log Channel").setDescription(`Log Channel set to ${match ? guild.channels.get(match[1]) : "`none`"}.`));
+            handler.database.setGuildPluginData(guild.id, this.plugin, response);
+        });
+    }
+}
+
+class LogChanges extends Discord.Command {
+    constructor() {
+        super("logchanges", [], "logchanges `true/false`", "set/toggle whether to log changes to member's messages\n`true/false` is not required, if not supplied will toggle instead.", false);
+    }
+    message(content, member, channel, guild, message, handler) {
+        handler.database.getGuildPluginData(guild.id, this.plugin, {logChannel:null, muteRole:null, logChanges:false}).then((response) => {
+            response.logChanges = !response.logChanges;
+            if (content.trim().toLowerCase() == "false") response.logChanges = false;
+            else if (content.trim().toLowerCase() == "true") response.logChanges = true;
+            channel.send(new Discord.RichEmbed().setTitle("Log Changes").setDescription(`Log Changes set to \`${response.logChanges}\`.`));
             handler.database.setGuildPluginData(guild.id, this.plugin, response);
         });
     }
@@ -20,7 +35,7 @@ class MuteRole extends Discord.Command {
         super("muterole", [], "muterole **role**", "set role for muting people, \n**role** is required and must be a role resolvable (@role or id).", false);
     }
     message(content, member, channel, guild, message, handler) {
-        handler.database.getGuildPluginData(guild.id, this.plugin, {logChannel:null, muteRole:null}).then((response) => {
+        handler.database.getGuildPluginData(guild.id, this.plugin, {logChannel:null, muteRole:null, logChanges:false}).then((response) => {
             const match = content.match(/[^\d]*(\d+)/);
             if (!match) response.muteRole = null;
             else response.muteRole = guild.roles.has(match[1]) ? match[1] : null;
@@ -50,7 +65,7 @@ class Warn extends Discord.Command {
                 const mention = guild.members.get(match[1]).toString();
                 const tag = guild.members.get(match[1]).user.tag;
                 channel.send(reply);
-                handler.database.getGuildPluginData(guild.id, this.plugin, {logChannel:null, muteRole:null}).then((response) => {
+                handler.database.getGuildPluginData(guild.id, this.plugin, {logChannel:null, muteRole:null, logChanges:false}).then((response) => {
                     if (response.logChannel && guild.channels.has(response.logChannel)) guild.channels.get(response.logChannel).send(reply.setDescription(`${member} Warned ${mention} (**${tag}**).`));
                 });
             } else {
@@ -67,7 +82,7 @@ class Mute extends Discord.Command {
         super("mute", [], "mute **@person** **time** `reason`", "mute people if muterole is set.\n**@person** is required and must be a mention (or user id).\n`reason` optional reason for mute.");
     }
     message(content, member, channel, guild, message, handler) {
-        handler.database.getGuildPluginData(guild.id, this.plugin, {logChannel:null, muteRole:null}).then((response) => {
+        handler.database.getGuildPluginData(guild.id, this.plugin, {logChannel:null, muteRole:null, logChanges:false}).then((response) => {
             const match = content.match(/[^\d]*(\d+)(?:$|.+?\s*(.*))/);
             if (match) {
                 if (!response.muteRole) {
@@ -95,7 +110,7 @@ class UnMute extends Discord.Command {
         super("unmute", [], "unmute **@person** **time** `reason`", "unmute people if muterole is set.\n**@person** is required and must be a mention (or user id).\n`reason` optional reason for unmute.");
     }
     message(content, member, channel, guild, message, handler) {
-        handler.database.getGuildPluginData(guild.id, this.plugin, {logChannel:null, muteRole:null}).then((response) => {
+        handler.database.getGuildPluginData(guild.id, this.plugin, {logChannel:null, muteRole:null, logChanges:false}).then((response) => {
             const match = content.match(/[^\d]*(\d+)(?:$|.+?\s*(.*))/);
             if (match) {
                 if (!response.muteRole) {
@@ -146,7 +161,7 @@ class Kick extends Discord.Command {
                 guild.members.get(match[1]).kick(match[2])
                     .then(e => {
                         channel.send(reply);
-                        handler.database.getGuildPluginData(guild.id, this.plugin, {logChannel:null, muteRole:null}).then((response) => {
+                        handler.database.getGuildPluginData(guild.id, this.plugin, {logChannel:null, muteRole:null, logChanges:false}).then((response) => {
                             if (response.logChannel && guild.channels.has(response.logChannel)) guild.channels.get(response.logChannel).send(reply.setDescription(`${member} Successfully Kicked ${mention} (**${tag}**).`));
                         });
                     })
@@ -178,7 +193,7 @@ class Ban extends Discord.Command {
                 guild.ban(match[1], {days:match[2] ? parseInt(match[2]) : 0, reason:match[3]})
                     .then(e => {
                         channel.send(reply);
-                        handler.database.getGuildPluginData(guild.id, this.plugin, {logChannel:null, muteRole:null}).then((response) => {
+                        handler.database.getGuildPluginData(guild.id, this.plugin, {logChannel:null, muteRole:null, logChanges:false}).then((response) => {
                             if (response.logChannel && guild.channels.has(response.logChannel)) guild.channels.get(response.logChannel).send(reply.setDescription(`${member} Successfully banned ${mention} (**${tag}**).`));
                         });
                     })
@@ -206,7 +221,7 @@ class UnBan extends Discord.Command {
             guild.unban(match[1], match[2])
                 .then(e => {
                     channel.send(reply);
-                    handler.database.getGuildPluginData(guild.id, this.plugin, {logChannel:null, muteRole:null}).then((response) => {
+                    handler.database.getGuildPluginData(guild.id, this.plugin, {logChannel:null, muteRole:null, logChanges:false}).then((response) => {
                         if (response.logChannel && guild.channels.has(response.logChannel)) guild.channels.get(response.logChannel).send(reply.setDescription(`${member} Successfully unbanned \`${match[1]}\`.`));
                     });
                 })
@@ -223,6 +238,7 @@ class ModTools extends Discord.Plugin {
     constructor() {
         super("ModTools", "Moderation tools.");
         this.addCommand(new LogChannel());
+        this.addCommand(new LogChanges());
         this.addCommand(new MuteRole());
         this.addCommand(new Mute());
         this.addCommand(new UnMute());
@@ -242,8 +258,8 @@ module.exports.load = function (client) {
         if (!newMessage.author.bot)
         client.database.getGuild(newMessage.guild.id, client.prefix).then((response) => {
             if (response.enabled.includes("ModTools")) {
-                client.database.getGuildPluginData(newMessage.guild.id, "ModTools", {logChannel:null, muteRole:null}).then((response) => {
-                    if (response.logChannel && oldMessage.content != newMessage.content) {
+                client.database.getGuildPluginData(newMessage.guild.id, "ModTools", {logChannel:null, muteRole:null, logChanges:false}).then((response) => {
+                    if (response.logChannel && response.logChanges && oldMessage.content != newMessage.content) {
                         if (newMessage.guild.channels.has(response.logChannel)) {
                             const reply = new Discord.RichEmbed().setAuthor(newMessage.author.tag, newMessage.author.displayAvatarURL).setDescription(`${newMessage.author}, Updated A Message in ${newMessage.channel}`).setTimestamp(newMessage.createdTimestamp).setTitle("Message Updated").setURL(newMessage.url);
 
@@ -275,8 +291,8 @@ module.exports.load = function (client) {
         if (!message.author.bot)
         client.database.getGuild(message.guild.id, client.prefix).then((response) => {
             if (response.enabled.includes("ModTools")) {
-                client.database.getGuildPluginData(message.guild.id, "ModTools", {logChannel:null, muteRole:null}).then((response) => {
-                    if (response.logChannel) {
+                client.database.getGuildPluginData(message.guild.id, "ModTools", {logChannel:null, muteRole:null, logChanges:false}).then((response) => {
+                    if (response.logChannel && response.logChanges) {
                         if (message.guild.channels.has(response.logChannel)) {
                             const reply = new Discord.RichEmbed().setAuthor(message.author.tag, message.author.displayAvatarURL).setDescription(`A message was deleted in ${message.channel}`).setTimestamp(message.createdTimestamp).setTitle("Message Deleted");
                             if (message.content.length > 1000) {
@@ -299,7 +315,7 @@ module.exports.load = function (client) {
         if (channel.guild && channel.type != "voice") {
             client.database.getGuild(channel.guild.id, client.prefix).then((response) => {
                 if (response.enabled.includes("ModTools")) {
-                    client.database.getGuildPluginData(channel.guild.id, "ModTools", {logChannel:null, muteRole:null}).then((response) => {
+                    client.database.getGuildPluginData(channel.guild.id, "ModTools", {logChannel:null, muteRole:null, logChanges:false}).then((response) => {
                         if (response.muteRole) {
                             let overwrite = true;
                             if (channel.permissionOverwrites.has(response.muteRole)) overwrite = !(channel.permissionOverwrites.get(response.muteRole).allow & 2048);
