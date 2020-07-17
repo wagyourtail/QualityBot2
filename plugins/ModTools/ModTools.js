@@ -266,7 +266,7 @@ module.exports.load = function (client) {
             if (response.enabled.includes("ModTools")) {
                 client.database.getGuildPluginData(newMessage.guild.id, "ModTools", {logChannel:null, muteRole:null, logChanges:false}).then((response) => {
                     if (response.logChannel && response.logChanges && oldMessage.content != newMessage.content) {
-                        const logChannel = guild.channels.resolve(response.logChannel);
+                        const logChannel = newMessage.guild.channels.resolve(response.logChannel);
                         if (logChannel) {
                             const reply = new Discord.RichEmbed().setAuthor(newMessage.author.tag, newMessage.author.displayAvatarURL).setDescription(`${newMessage.author}, Updated A Message in ${newMessage.channel}`).setTimestamp(newMessage.createdTimestamp).setTitle("Message Updated").setURL(newMessage.url);
 
@@ -300,7 +300,7 @@ module.exports.load = function (client) {
             if (response.enabled.includes("ModTools")) {
                 client.database.getGuildPluginData(message.guild.id, "ModTools", {logChannel:null, muteRole:null, logChanges:false}).then((response) => {
                     if (response.logChannel && response.logChanges) {
-                        const logChannel = guild.channels.resolve(response.logChannel);
+                        const logChannel = message.guild.channels.resolve(response.logChannel);
                         if (logChannel) {
                             const reply = new Discord.RichEmbed().setAuthor(message.author.tag, message.author.displayAvatarURL).setDescription(`A message was deleted in ${message.channel}`).setTimestamp(message.createdTimestamp).setTitle("Message Deleted");
                             if (message.content.length > 1000) {
