@@ -43,7 +43,6 @@ class ChannelFilter extends Discord.Command {
                             }
                         });
                     } else {
-                        console.log(content);
                         channel.send(new Discord.RichEmbed().setTitle("ChannelFilter: list").addField("Failed", "**channel** didn't parse."));
                     }
                 }

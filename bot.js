@@ -17,7 +17,7 @@ for (const plugin of folders) {
 }
 
 Client.on("ready", () => {
-    Client.user.setPresence({game: { name: "qualitybot.xyz"}, status: 'online'});
+    Client.user.setPresence({activity: { name: "qualitybot.xyz"}, status: 'online'});
 });
 
 Client.database.getClientToken("560741159903821824").then((secret) => { //obviously this'll change based on your implementation of storing secrets.
