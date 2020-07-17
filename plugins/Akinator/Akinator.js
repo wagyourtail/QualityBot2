@@ -1,5 +1,5 @@
 const Discord = require("../../CommandHandler2.js");
-const aki = require('aki-api');
+const aki = new (require('aki-api'))('en2');
 
 const ids = {};
 
@@ -27,7 +27,7 @@ class akinator extends Discord.Command {
     }
     message(content, author, channel, guild, message, handler) {
 		const a = async () => {
-			const gd = await aki.start('en2')
+			const gd = await aki.start();
 			let ni = {'nextStep':0,'progress':'0'};
 			const msg = await channel.send(new Discord.RichEmbed().setTitle("Akinator").setDescription(`Question #${ni.nextStep+1}`).addField(gd.question,`Progress: ${parseInt(ni.progress)}%`).addField("Options","✔:Yes	✖:No	ℹ:Don't Know	🇵:Probably	🇳:Probably Not", true))
 			msg.react("✔").then(()=>{msg.react("✖").then(()=>{msg.react("ℹ").then(()=>{msg.react("🇵").then(()=>{msg.react("🇳")})})})});

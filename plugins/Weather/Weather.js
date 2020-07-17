@@ -12,8 +12,8 @@ class weatherCl extends Discord.Command {
                     .then(mes => {
                         handler.database.getGuildPluginData(guild.id, this.plugin, {deleteMessages:true}).then((response) => {
                             if (response.deleteMessages) {
-                                mes.delete(20 * 1000);
-                                message.delete(20 * 1000);
+                                mes.delete({ timeout: 20 * 1000 });
+                                message.delete({ timeout: 20 * 1000 });
                             }
                         });
                     });
@@ -22,8 +22,8 @@ class weatherCl extends Discord.Command {
                     .then(mes => {
                         handler.database.getGuildPluginData(guild.id, this.plugin, {deleteMessages:true}).then((response) => {
                             if (response.deleteMessages) {
-                                mes.delete(20 * 1000);
-                                message.delete(20 * 1000);
+                                mes.delete({ timeout: 20 * 1000 });
+                                message.delete({ timeout: 20 * 1000 });
                             }
                         });
                     });
