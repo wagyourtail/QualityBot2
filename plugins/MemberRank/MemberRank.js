@@ -187,7 +187,7 @@ module.exports.load = function (client) {
                         client.database.setGuildMemberLastMessage(msg.guild.id, "MemberRank", msg.author.id, msg.createdTimestamp);
                         updateMember(msg.member, msg.guild, client).then(async (rank) => {
                             const memberID = msg.guild.members.resolve((await client.database.getRanks(msg.guild.id, "MemberRank", rank, 1))[0]);
-                            const member = msg.guild.members.resolve(memberID.member);
+                            const member = msg.guild.members.resolve(memberID?.member);
                             if (member) updateMember(member, msg.guild, client);
                             else if (memberID) client.database.deleteUser(msg.guild.id, "MemberRank", memberID.member);
                         });
