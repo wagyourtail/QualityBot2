@@ -6,7 +6,7 @@ class AIListRoles extends Discord.Command {
     }
     message(content, member, channel, guild, message, handler) {
         let roles = [];
-        guild.roles.fetch().then(roles => roles.forEach(role => {
+        guild.roles.fetch().then(rolees => rolees.cache.forEach(role => {
             roles.push(`**${role.position}.** ${role}: ${role.id}`);
 		}));
         roles.sort((a, b) => a.match(/(\d+)/)[1] - b.match(/(\d+)/)[1]);
