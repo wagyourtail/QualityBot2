@@ -14,7 +14,7 @@ module.exports.get = function(guildID) {
 
 module.exports.put = function(guildID, data) {
     return new Promise(async (res, rej) => {
-        db.setGuildEnabled(guildID, Object.keys(data).filter(k => plugins.includes(k)));
+        db.setGuildEnabled(guildID, [].concat(Object.keys(data).filter(k => plugins.includes(k))));
         const prefix = data.prefix.replace(/\s/g, "");
         if (prefix && prefix.length < 10 && prefix.length > 0) db.setGuildPrefix(guildID, prefix);
         res();

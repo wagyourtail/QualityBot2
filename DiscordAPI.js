@@ -15,7 +15,7 @@ module.exports.getGuildRoles = function(guildID) {
         let i = 0;
         do {
             const token = await db.getClientToken(BotIDs[i]);
-            guildRoles = await new Promise((r,j) => {request({url:`https://discordapp.com/api/guilds/${guildID}/roles`, headers: {Authorization:`Bot ${token}`}}, (err, res, bod) => {r(JSON.parse(bod))})});
+            guildRoles = await new Promise((r,j) => {request({url:`https://discord.com/api/guilds/${guildID}/roles`, headers: {Authorization:`Bot ${token}`}}, (err, res, bod) => {r(JSON.parse(bod))})});
             i++;
         } while (guildRoles && guildRoles.constructor !== Array && i < BotIDs.length);
         const roles = {}
