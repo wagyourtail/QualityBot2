@@ -9,7 +9,7 @@ class ChannelFilter extends Discord.Command {
             case "list":
                 {
                     const match = content.match(/[^\d]*?(\d+|all)/);
-                    if (match && (match[1] == "all" || guild.channels.has(match[1]))) {
+                    if (match && (match[1] == "all" || guild.channels.cache.has(match[1]))) {
                         handler.database.getGuildPluginData(guild.id, this.plugin, {}).then(data => {
                             if (!data[match[1]]) data[match[1]] = {regex:[], attachments:false};
                             let i = 0;
@@ -25,7 +25,7 @@ class ChannelFilter extends Discord.Command {
             case "add":
                 {
                     const match = content.match(/[^\d]*?(\d+|all).*?(?:\/(.+)\/|attachments)/);
-                    if (match && (match[1] == "all" || guild.channels.has(match[1]))) {
+                    if (match && (match[1] == "all" || guild.channels.cache.has(match[1]))) {
                         handler.database.getGuildPluginData(guild.id, this.plugin, {}).then(data => {
                             if (!data[match[1]]) data[match[1]] = {regex:[], attachments:false};
                             if (content.split(" ")[2] == "attachments") {
@@ -51,7 +51,7 @@ class ChannelFilter extends Discord.Command {
             case "del":
                 {
                     const match = content.match(/[^\d]*?(\d+|all).*?(?:\/(.+)\/|attachments)/);
-                    if (match && (match[1] == "all" || guild.channels.has(match[1]))) {
+                    if (match && (match[1] == "all" || guild.channels.cache.has(match[1]))) {
                         handler.database.getGuildPluginData(guild.id, this.plugin, {}).then(data => {
                             if (!data[match[1]]) data[match[1]] = {regex:[], attachments:false};
                             if (content.split(" ")[2] == "attachments") {

@@ -161,13 +161,13 @@ function updateMember(member, guild, client) {
             const userRank = await client.database.getGuildMemberEXP(guild.id, "MemberRank", member.id);
             ++userRank.rank;
             for (const [rank, role] of Object.entries(ranks.static)) {
-                if (userRank.rank <= rank && guild.roles.cache.has(role) && !member.roles.cache.has(role)) member.addRole(role);
-                if (userRank.rank > rank && guild.roles.cache.has(role) && member.roles.cache.has(role)) member.removeRole(role);
+                if (userRank.rank <= rank && guild.roles.resolve(role) && !member.roles.cache.has(role)) member.addRole(role);
+                if (userRank.rank > rank && guild.roles.resolve(role) && member.roles.cache.has(role)) member.removeRole(role);
             }
             const userCount = await client.database.getUserCount(guild.id, "MemberRank");
             for (const [rank, role] of Object.entries(ranks.dynamic)) {
-                if (userRank.rank <= (userCount * rank / 100) && guild.roles.cache.has(role) && !member.roles.cache.has(role)) member.addRole(role);
-                if (userRank.rank > (userCount * rank / 100) && guild.roles.cache.has(role) && member.roles.cache.has(role)) member.removeRole(role);
+                if (userRank.rank <= (userCount * rank / 100) && guild.roles.resolve(role) && !member.roles.cache.has(role)) member.addRole(role);
+                if (userRank.rank > (userCount * rank / 100) && guild.roles.resolve(role) && member.roles.cache.has(role)) member.removeRole(role);
             }
             resolve(userRank.rank);
         });
@@ -186,9 +186,10 @@ module.exports.load = function (client) {
                         client.database.guildMemberAddEXP(msg.guild.id, "MemberRank", msg.author.id, getPoints(time));
                         client.database.setGuildMemberLastMessage(msg.guild.id, "MemberRank", msg.author.id, msg.createdTimestamp);
                         updateMember(msg.member, msg.guild, client).then(async (rank) => {
-                            const member = (await client.database.getRanks(msg.guild.id, "MemberRank", rank, 1))[0];
-                            if (member && msg.guild.members.cache.has(member.member)) updateMember(msg.guild. members.cache.get(member.member), msg.guild, client);
-                            else if (member) client.database.deleteUser(msg.guild.id, "MemberRank", member.member);
+                            const memberID = msg.guild.members.resolve((await client.database.getRanks(msg.guild.id, "MemberRank", rank, 1))[0]);
+                            const member = msg.guild.members.resolve(memberID.member);
+                            if (member) updateMember(member, msg.guild, client);
+                            else if (memberID) client.database.deleteUser(msg.guild.id, "MemberRank", memberID.member);
                         });
                     }
                 }

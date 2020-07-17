@@ -12,8 +12,9 @@ class SecretPhrase extends Discord.Command {
                         .setTitle("SecretPhrase: List");
                     const mappings = [];
                     for (const [key, value] of Object.entries(response.roles)) {
-                        if (guild.roles.has(value)) {
-                            mappings.push(`\`${key.toLowerCase()}\` -> ${guild.roles.get(value)}`);
+                        const role = guild.roles.resolve(value);
+                        if (role) {
+                            mappings.push(`\`${key.toLowerCase()}\` -> ${role}`);
                             if (key.toLowerCase() != key) {
                                 delete response.roles[key];
                                 response.roles[key.toLowerCase()] = value;
@@ -32,9 +33,10 @@ class SecretPhrase extends Discord.Command {
                     const reply = new Discord.RichEmbed()
                         .setTitle("SecretPhrase: Add");
                     const matches = content.match(/[^\d]*?(\d+)[^"]*?"([^\"]+)/);
-                    if (matches && guild.roles.has(matches[1])) {
+                    const role = guild.roles.resolve(matches?.[1])
+                    if (role) {
                         response.roles[matches[2].toLowerCase()] = matches[1];
-                        reply.addField("Success", `\`${matches[2].toLowerCase()}\` -> ${guild.roles.get(matches[1])}`);
+                        reply.addField("Success", `\`${matches[2].toLowerCase()}\` -> ${role}`);
                     } else {
                         reply.addField("Fail", "failed to parse role/phrase");
                     }

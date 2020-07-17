@@ -8,7 +8,16 @@ class Client extends Discord.Client {
         this.on("message", this.handle);
         this.on("ready", () => { console.log(`${this.user.username} ready!`) });
         this.on("guildUpdate", (old, guild) => {
-            message.guild.roles.fetch().catch(console.log);
+            guild.roles.fetch().catch(console.log);
+        });
+        this.on("guildMemberUpdate", (old, member) => {
+            member.roles.fetch().catch(console.log);
+        });
+        this.on("guildMemberAdd", (member) => {
+            member.guild.members.fetch();
+        });
+        this.on("guildMemberRemove", (member) => {
+            member.guild.members.fetch();
         });
         this.plugins = new Discord.Collection();
         this.database = database;
@@ -94,7 +103,8 @@ class Command {
             reply.addField("Aliases",  aliases[this.name].join(", "));
             const roles = [];
             for (const role of perms[this.name]) {
-                if (guild.roles.cache.has(role)) roles.push(guild.roles.cache.get(role).toString());
+                let roleResolve = guild.roles.resolve(role);
+                if (roleResolve) roles.push(roleResolve.toString());
                 if (role == "@everyone") roles.push("@everyone");
             }
             if (roles.length > 0) reply.addField("Permissions", roles.join(", "));

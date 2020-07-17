@@ -5,16 +5,9 @@ const updateMessage = (guild, data) => {
     const messages = [].concat(data.message);
     for (let i = 0; i < Math.ceil(reactions.length / 15); i++) {
         if (messages[i]) {
-            guild.channels.get(messages[i].channel).fetchMessage(messages[i].id).then(msg => {
-                msg.reactions.filter(reaction => !reactions.slice(15*i, 15*(i+1)).includes(reaction._emoji.id)).forEach(reaction => {
-                    reaction.fetchUsers().then(users => {
-                        users.forEach(user => {
-                            reaction.remove(user);
-                        });
-                    });
-                });
+            guild.channels.resolve(messages[i].channel).fetchMessage(messages[i].id).then(msg => {
                 for(let j = 15*i; j < 15 * (i + 1) && j < reactions.length; j++) {
-                    if (!msg.reactions.has(reactions[j])) msg.react(reactions[j]);
+                    if (!msg.reactions.resolve(reactions[j]).me) msg.react(reactions[j]);
                 }
             });
         }
@@ -45,7 +38,7 @@ class GameRole extends Discord.Command {
                         .setTitle("GameRole: List");
                     const mappings = [];
                     for (const [key, value] of Object.entries(response.roles)) {
-                        mappings.push(`${guild.emojis.get(key)} -> ${guild.roles.get(value)}`);
+                        mappings.push(`${guild.emojis.resolve(key)} -> ${guild.roles.resolve(value)}`);
                     }
                     if (mappings.length) reply.setDescription(mappings.join('\n'));
                     channel.send(reply);
@@ -56,9 +49,11 @@ class GameRole extends Discord.Command {
                     const reply = new Discord.RichEmbed()
                         .setTitle("GameRole: Add");
                     const matches = content.match(/[^\d]*(\d+)[^\d]+?:[^\s]+:[^\d]*(\d+)/);
-                    if (matches && guild.roles.has(matches[1]) && guild.emojis.has(matches[2])) {
+                    const role = guild.roles.resolve(matches[1]);
+                    const emoji = guild.emojis.resolve(matches[2]);
+                    if (role && emoji) {
                         response.roles[matches[2]] = matches[1];
-                        reply.addField("Success", `${guild.emojis.get(matches[2])} -> ${guild.roles.get(matches[1])}`);
+                        reply.addField("Success", `${emoji} -> ${role}`);
                     } else {
                         reply.addField("Fail", "failed to parse role/emoji");
                     }
@@ -74,7 +69,7 @@ class GameRole extends Discord.Command {
                     const matches = content.match(/[^\d]*?:[^\s]+:[^\d]*(\d+)/);
                     if (matches && response.roles[matches[1]]) {
                         delete response.roles[matches[1]];
-                        reply.addField("Success", `${guild.emojis.get(matches[1])} no longer assigned.`);
+                        reply.addField("Success", `${guild.emojis.resolve(matches[1])} no longer assigned.`);
                     } else {
                         reply.addField("Fail", "failed to parse emoji or is not assigned.");
                     }
@@ -155,7 +150,7 @@ module.exports.load = function(client) {
                 if (response.enabled.includes("GameRole")) {
                     client.database.getGuildPluginData(event.d.guild_id, "GameRole", {roles:{}, message:[]}).then(response => {
                         if ([].concat(response.message).map(e => e.id).includes(event.d.message_id) && response.roles[event.d.emoji.id]) {
-                            client.guilds.get(event.d.guild_id).members.get(event.d.user_id).addRole(response.roles[event.d.emoji.id]).catch(console.log);
+                            client.guilds.resolve(event.d.guild_id).members.resolve(event.d.user_id).addRole(response.roles[event.d.emoji.id]).catch(console.log);
                         }
                     });
                 }
@@ -165,7 +160,7 @@ module.exports.load = function(client) {
                 if (response.enabled.includes("GameRole")) {
                     client.database.getGuildPluginData(event.d.guild_id, "GameRole", {roles:{}, message:[]}).then(response => {
                         if ([].concat(response.message).map(e => e.id).includes(event.d.message_id) && response.roles[event.d.emoji.id]) {
-                            client.guilds.get(event.d.guild_id).members.get(event.d.user_id).removeRole(response.roles[event.d.emoji.id]).catch(console.log);
+                            client.guilds.resolve(event.d.guild_id).members.resolve(event.d.user_id).removeRole(response.roles[event.d.emoji.id]).catch(console.log);
                         }
                     });
                 }

@@ -29,15 +29,15 @@ class akinator extends Discord.Command {
 		const a = async () => {
 			const gd = new Aki('en');
 			await gd.start();
-			const msg = await channel.send(new Discord.RichEmbed().setTitle("Akinator").setDescription(`Question #${gd.currentStep}`).addField(gd.question,`Progress: ${parseInt(gd.progress * 100)}%`).addField("Options","✔:Yes	✖:No	ℹ:Don't Know	🇵:Probably	🇳:Probably Not", true))
+			const msg = await channel.send(new Discord.RichEmbed().setTitle("Akinator").setDescription(`Question #${gd.currentStep+1}`).addField(gd.question,`Progress: ${parseInt(gd.progress * 100)}%`).addField("Options","✔:Yes	✖:No	ℹ:Don't Know	🇵:Probably	🇳:Probably Not", true))
 			msg.react("✔").then(()=>{msg.react("✖").then(()=>{msg.react("ℹ").then(()=>{msg.react("🇵").then(()=>{msg.react("🇳")})})})});
 				do {
 					await gd.step(await waitForReact(channel, author, msg));
-					msg.edit(new Discord.RichEmbed().setTitle("Akinator").setDescription(`Question #${gd.currentStep}`).addField(gd.question, `Progress: ${parseInt(gd.progress)}%`).addField("Options", "✔:Yes	✖:No	ℹ:Don't Know	🇵:Probably	🇳:Probably Not", true))
+					msg.edit(new Discord.RichEmbed().setTitle("Akinator").setDescription(`Question #${gd.currentStep+1}`).addField(gd.question, `Progress: ${parseInt(gd.progress)}%`).addField("Options", "✔:Yes	✖:No	ℹ:Don't Know	🇵:Probably	🇳:Probably Not", true))
 				} while (parseFloat(gd.progress) < 85);
 			await gd.win();
-			msg.edit(new Discord.RichEmbed().setTitle("Akinator").setDescription("").addField(`${gd.answers[0].name}`, `${gd.answers[0].description}`, true).addField(`Questions: ${gd.currentStep}`, `certainty: ${parseInt(parseFloat(gd.answers[0].proba) * 100)}%`).setImage(gd.answers[0].absolute_picture_path))
-				msg.clearReactions();
+			msg.edit(new Discord.RichEmbed().setTitle("Akinator").setDescription("").addField(`${gd.answers[0].name}`, `${gd.answers[0].description}`, true).addField(`Questions: ${gd.currentStep+1}`, `certainty: ${parseInt(parseFloat(gd.answers[0].proba) * 100)}%`).setImage(gd.answers[0].absolute_picture_path))
+				msg.reactions.removeAll();
 		}
 		a();
 	}

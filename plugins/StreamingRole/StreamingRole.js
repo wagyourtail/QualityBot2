@@ -8,9 +8,10 @@ class StreamRole extends Discord.Command {
         const role = content.match(/[^\d]*(\d+).*/);
         const reply = new Discord.RichEmbed()
             .setTitle("StreamingRole: ");
-        if (role && guild.roles.has(role[1])) {
+        const roleR = guild.roles.resolve(role[1]);
+        if (roleR) {
             handler.database.setGuildPluginData(guild.id, this.plugin, {id:role[1]});
-            reply.addField("Success", `Successfully set ${guild.roles.get(role[1])} as the streaing role.`);
+            reply.addField("Success", `Successfully set ${roleR} as the streaing role.`);
         } else {
             reply.addField("Fail", "Could not parse **role**.");
         }
@@ -33,11 +34,11 @@ module.exports.load = function(client) {
             if (response.enabled.includes("StreamingRole")) {
                 if (newMember.presence.game?.streaming) {
                     client.database.getGuildPluginData(newMember.guild.id, "StreamingRole", {id:null}).then(response => {
-                        if (response.id) newMember.addRole(response.id, "Streaming");
+                        if (response.id) newMember.roles.add(response.id, "Streaming");
                     });
                 } else if (oldMember.presence.game?.streaming) {
                     client.database.getGuildPluginData(newMember.guild.id, "StreamingRole", {id:null}).then(response => {
-                        if (response.id) newMember.removeRole(response.id, "No Longer Streaming");
+                        if (response.id) newMember.roles.remove(response.id, "No Longer Streaming");
                     });
                 }
             }

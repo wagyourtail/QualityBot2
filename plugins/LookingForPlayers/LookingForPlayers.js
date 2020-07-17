@@ -8,11 +8,11 @@ class LFPCategory extends Discord.Command {
         const id = content.match(/[^\d]*(\d+).*/);
         const reply = new Discord.RichEmbed()
             .setTitle("LookingForPlayers: Category");
-        let parent = channel.parentID;
-        if (id && guild.channels.get(id[1]).parentID) parent = guild.channels.get(id[1]).parentID;
-        if (guild.channels.get(parent) && guild.channels.get(parent).type == 'category') {
-            handler.database.setGuildPluginData(guild.id, this.plugin, {id:parent});
-            reply.addField("Success", `category set to ${guild.channels.get(parent)}`);
+        let parent = channel.parent;
+        if (id) parent = guild.channels.resolve(id[1])?.parent;
+        if (guild.channels.resolve(parent)) {
+            handler.database.setGuildPluginData(guild.id, this.plugin, {id:parent.id});
+            reply.addField("Success", `category set to ${parent}`);
         } else {
             reply.addField("Fail", "channel is not in a category.");
         }

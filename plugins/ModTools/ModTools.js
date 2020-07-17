@@ -9,7 +9,7 @@ class LogChannel extends Discord.Command {
             const match = content.match(/[^\d]*(\d+)/);
             if (!match) response.logChannel = null;
             else response.logChannel = match[1];
-            channel.send(new Discord.RichEmbed().setTitle("Log Channel").setDescription(`Log Channel set to ${match ? guild.channels.get(match[1]) : "`none`"}.`));
+            channel.send(new Discord.RichEmbed().setTitle("Log Channel").setDescription(`Log Channel set to ${match ? guild.channels.resolve(match[1]) : "`none`"}.`));
             handler.database.setGuildPluginData(guild.id, this.plugin, response);
         });
     }
@@ -38,8 +38,8 @@ class MuteRole extends Discord.Command {
         handler.database.getGuildPluginData(guild.id, this.plugin, {logChannel:null, muteRole:null, logChanges:false}).then((response) => {
             const match = content.match(/[^\d]*(\d+)/);
             if (!match) response.muteRole = null;
-            else response.muteRole = guild.roles.has(match[1]) ? match[1] : null;
-            channel.send(new Discord.RichEmbed().setTitle("Mute Role").setDescription(`Mute Role set to ${response.muteRole ? guild.roles.get(match[1]) : "`none`"}.`));
+            else response.muteRole = guild.roles.resolve(match[1]) ? match[1] : null;
+            channel.send(new Discord.RichEmbed().setTitle("Mute Role").setDescription(`Mute Role set to ${response.muteRole ? guild.roles.resolve(match[1]) : "`none`"}.`));
             handler.database.setGuildPluginData(guild.id, this.plugin, response);
             if (response.muteRole) {
                 Array.from(guild.channels).filter(e => e[1].type != "voice").forEach(e => {
@@ -59,14 +59,16 @@ class Warn extends Discord.Command {
     message(content, member, channel, guild, message, handler) {
         const match = content.match(/[^\d]*(\d+)(?:$|.+?\s*(.*))/);
         if (match) {
-            if (guild.members.has(match[1])) {
-                const reply = new Discord.RichEmbed().setTitle("Warn").setDescription(`Warn ${guild.members.get(match[1])}`);
+            const mmember = guild.members.resolve(match[1]);
+            if (mmember) {
+                const reply = new Discord.RichEmbed().setTitle("Warn").setDescription(`Warn ${mmember}`);
                 if (match[2]) reply.addField("Reason: ", match[2]);
-                const mention = guild.members.get(match[1]).toString();
-                const tag = guild.members.get(match[1]).user.tag;
+                const mention = mmember.toString();
+                const tag = member.user.tag;
                 channel.send(reply);
-                handler.database.getGuildPluginData(guild.id, this.plugin, {logChannel:null, muteRole:null, logChanges:false}).then((response) => {
-                    if (response.logChannel && guild.channels.has(response.logChannel)) guild.channels.get(response.logChannel).send(reply.setDescription(`${member} Warned ${mention} (**${tag}**).`));
+                handler.database.getGuildPluginData(guild.id, this.plugin, { logChannel: null, muteRole: null, logChanges: false }).then((response) => {
+                    const logChannel = guild.channels.resolve(response.logChannel);
+                    if (logChannel) logChannel.send(reply.setDescription(`${member} Warned ${mention} (**${tag}**).`));
                 });
             } else {
                 channel.send(new Discord.RichEmbed().setTitle("Kick").setDescription(`Failed to kick as \`${match[1]}\` not found.`));
@@ -89,12 +91,14 @@ class Mute extends Discord.Command {
                     channel.send(new Discord.RichEmbed().setTitle("Mute").setDescription("Failed, mute role not set."));
                     return;
                 }
-                if (guild.members.has(match[1])) {
-                    const reply = new Discord.RichEmbed().setTitle("Mute").setDescription(`Successfully muted ${guild.members.get(match[1])}.`);
+                const mention = guild.members.resolve(match[1]);
+                if (mention) {
+                    const reply = new Discord.RichEmbed().setTitle("Mute").setDescription(`Successfully muted ${mention}.`);
                     if (match[2]) reply.addField("Reason: ", match[2]);
-                    guild.members.get(match[1]).addRole(response.muteRole);
+                    mention.roles.add(response.muteRole);
                     channel.send(reply);
-                    if (response.logChannel && guild.channels.has(response.logChannel)) guild.channels.get(response.logChannel).send(reply.setDescription(`${member} Successfully muted ${guild.members.get(match[1])} (**${guild.members.get(match[1]).user.tag}**).`));
+                    const logChannel = guild.channels.resolve(response.logChannel);
+                    if (logChannel) logChannel.send(reply.setDescription(`${member} Successfully muted ${mention} (**${mention.user.tag}**).`));
                 } else {
                     channel.send(new Discord.RichEmbed().setTitle("Mute").setDescription("Failed, user does not exist."));
                 }
@@ -117,12 +121,14 @@ class UnMute extends Discord.Command {
                     channel.send(new Discord.RichEmbed().setTitle("UnMute").setDescription("Failed, mute role not set."));
                     return;
                 }
-                if (guild.members.has(match[1])) {
-                    const reply = new Discord.RichEmbed().setTitle("UnMute").setDescription(`Successfully unmuted ${guild.members.get(match[1])}.`);
+                const mention = guild.members.resolve(match[1]);
+                if (mention) {
+                    const reply = new Discord.RichEmbed().setTitle("UnMute").setDescription(`Successfully unmuted ${mention}.`);
                     if (match[2]) reply.addField("Reason: ", match[2]);
-                    guild.members.get(match[1]).removeRole(response.muteRole);
+                    mention.roles.remove(response.muteRole);
                     channel.send(reply);
-                    if (response.logChannel && guild.channels.has(response.logChannel)) guild.channels.get(response.logChannel).send(reply.setDescription(`${member} Successfully unmuted ${guild.members.get(match[1])} (**${guild.members.get(match[1]).user.tag}**).`));
+                    const logChannel = guild.channels.resolve(response.logChannel);
+                    if (logChannel) logChannel.send(reply.setDescription(`${member} Successfully unmuted ${mention} (**${mention.user.tag}**).`));
                 } else {
                     channel.send(new Discord.RichEmbed().setTitle("UnMute").setDescription("Failed, user does not exist."));
                 }
@@ -152,21 +158,21 @@ class Kick extends Discord.Command {
     }
     message(content, member, channel, guild, message, handler) {
         const match = content.match(/[^\d]*(\d+)(?:$|.+?\s*(.*))/);
+        const mention = guild.members.resolve(match[1]);
         if (match) {
-            if (guild.members.has(match[1])) {
-                const reply = new Discord.RichEmbed().setTitle("Kick").setDescription(`Successfully Kicked ${guild.members.get(match[1])}`);
+            if (mention) {
+                const reply = new Discord.RichEmbed().setTitle("Kick").setDescription(`Successfully Kicked ${mention}`);
                 if (match[2]) reply.addField("Reason: ", match[2]);
-                const mention = guild.members.get(match[1]).toString();
-                const tag = guild.members.get(match[1]).user.tag;
-                guild.members.get(match[1]).kick(match[2])
+                guild.members.cache.get(match[1]).kick(match[2])
                     .then(e => {
                         channel.send(reply);
-                        handler.database.getGuildPluginData(guild.id, this.plugin, {logChannel:null, muteRole:null, logChanges:false}).then((response) => {
-                            if (response.logChannel && guild.channels.has(response.logChannel)) guild.channels.get(response.logChannel).send(reply.setDescription(`${member} Successfully Kicked ${mention} (**${tag}**).`));
+                        handler.database.getGuildPluginData(guild.id, this.plugin, { logChannel: null, muteRole: null, logChanges: false }).then((response) => {
+                            const logChannel = guild.channels.resolve(response.logChannel);
+                            if (logChannel) logChannel.send(reply.setDescription(`${member} Successfully Kicked ${mention} (**${mention.user.tag}**).`));
                         });
                     })
                     .catch(e => {
-                        channel.send(new Discord.RichEmbed().setTitle("Kick").setDescription(`Failed to kick ${guild.members.get(match[1])}`));
+                        channel.send(new Discord.RichEmbed().setTitle("Kick").setDescription(`Failed to kick ${mention}`));
                     });
             } else {
                 channel.send(new Discord.RichEmbed().setTitle("Kick").setDescription(`Failed to kick as \`${match[1]}\` not found.`));
@@ -183,22 +189,21 @@ class Ban extends Discord.Command {
     }
     message(content, member, channel, guild, message, handler) {
         const match = content.match(/[^\d]*(\d+)(?:$|.+?(\d+))(?:$|\s*(.*))/);
-        console.log(match);
+        const mention = guild.members.resolve(match[1]);
         if (match) {
-            if (guild.members.has(match[1])) {
-                const reply = new Discord.RichEmbed().setTitle("Ban").setDescription(`Successfully Banned ${guild.members.get(match[1])}`);
+            if (mention) {
+                const reply = new Discord.RichEmbed().setTitle("Ban").setDescription(`Successfully Banned ${mention}`);
                 if (match[3]) reply.addField("Reason: ", match[3]);
-                const mention = guild.members.get(match[1]).toString();
-                const tag = guild.members.get(match[1]).user.tag;
                 guild.ban(match[1], {days:match[2] ? parseInt(match[2]) : 0, reason:match[3]})
                     .then(e => {
                         channel.send(reply);
-                        handler.database.getGuildPluginData(guild.id, this.plugin, {logChannel:null, muteRole:null, logChanges:false}).then((response) => {
-                            if (response.logChannel && guild.channels.has(response.logChannel)) guild.channels.get(response.logChannel).send(reply.setDescription(`${member} Successfully banned ${mention} (**${tag}**).`));
+                        handler.database.getGuildPluginData(guild.id, this.plugin, { logChannel: null, muteRole: null, logChanges: false }).then((response) => {
+                            const logChannel = guild.channels.resolve(response.logChannel);
+                            if (logChannel) logChannel.send(reply.setDescription(`${member} Successfully banned ${mention} (**${mention.user.tag}**).`));
                         });
                     })
                     .catch(e => {
-                        channel.send(new Discord.RichEmbed().setTitle("Ban").setDescription(`Failed to ban ${guild.members.get(match[1])}`));
+                        channel.send(new Discord.RichEmbed().setTitle("Ban").setDescription(`Failed to ban ${mention}`));
                     });
             } else {
                 channel.send(new Discord.RichEmbed().setTitle("Ban").setDescription(`Failed to ban as \`${match[1]}\` not found or not bannable.`));
@@ -221,8 +226,9 @@ class UnBan extends Discord.Command {
             guild.unban(match[1], match[2])
                 .then(e => {
                     channel.send(reply);
-                    handler.database.getGuildPluginData(guild.id, this.plugin, {logChannel:null, muteRole:null, logChanges:false}).then((response) => {
-                        if (response.logChannel && guild.channels.has(response.logChannel)) guild.channels.get(response.logChannel).send(reply.setDescription(`${member} Successfully unbanned \`${match[1]}\`.`));
+                    handler.database.getGuildPluginData(guild.id, this.plugin, { logChannel: null, muteRole: null, logChanges: false }).then((response) => {
+                        const logChannel = guild.channels.resolve(response.logChannel);
+                        if (logChannel) logChannel.send(reply.setDescription(`${member} Successfully unbanned \`${match[1]}\`.`));
                     });
                 })
                 .catch(e => {
@@ -260,7 +266,8 @@ module.exports.load = function (client) {
             if (response.enabled.includes("ModTools")) {
                 client.database.getGuildPluginData(newMessage.guild.id, "ModTools", {logChannel:null, muteRole:null, logChanges:false}).then((response) => {
                     if (response.logChannel && response.logChanges && oldMessage.content != newMessage.content) {
-                        if (newMessage.guild.channels.has(response.logChannel)) {
+                        const logChannel = guild.channels.resolve(response.logChannel);
+                        if (logChannel) {
                             const reply = new Discord.RichEmbed().setAuthor(newMessage.author.tag, newMessage.author.displayAvatarURL).setDescription(`${newMessage.author}, Updated A Message in ${newMessage.channel}`).setTimestamp(newMessage.createdTimestamp).setTitle("Message Updated").setURL(newMessage.url);
 
                             if (oldMessage.content.length > 1000) {
@@ -279,7 +286,7 @@ module.exports.load = function (client) {
                             const attachments = Array.from(newMessage.attachments);
                             console.log(attachments)
                             if (attachments.length) reply.addField("Attachments: ", attachments.map(e => e[1].proxyURL).join("\n"));
-                            newMessage.guild.channels.get(response.logChannel).send(reply);
+                            logChannel.send(reply);
                         }
                     }
                 });
@@ -293,7 +300,8 @@ module.exports.load = function (client) {
             if (response.enabled.includes("ModTools")) {
                 client.database.getGuildPluginData(message.guild.id, "ModTools", {logChannel:null, muteRole:null, logChanges:false}).then((response) => {
                     if (response.logChannel && response.logChanges) {
-                        if (message.guild.channels.has(response.logChannel)) {
+                        const logChannel = guild.channels.resolve(response.logChannel);
+                        if (logChannel) {
                             const reply = new Discord.RichEmbed().setAuthor(message.author.tag, message.author.displayAvatarURL).setDescription(`A message was deleted in ${message.channel}`).setTimestamp(message.createdTimestamp).setTitle("Message Deleted");
                             if (message.content.length > 1000) {
                                 reply.addField("Content: ", `\u200b${message.content.substring(0, 1000)}`, false);
@@ -303,7 +311,7 @@ module.exports.load = function (client) {
                             }
                             const attachments = Array.from(message.attachments);
                             if (attachments.length) reply.addField("Attachments: ", attachments.map(e => e[1].proxyURL).join("\n"));
-                            message.guild.channels.get(response.logChannel).send(reply);
+                            logChannel.send(reply);
                         }
                     }
                 });

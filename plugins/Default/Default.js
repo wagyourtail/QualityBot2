@@ -54,7 +54,8 @@ class Permissions extends Discord.Command {
                             for (const command of Object.keys(perms)) {
                                 const roles = [];
                                 for (const role of perms[command]) {
-                                    if (guild.roles.has(role)) roles.push(guild.roles.get(role).toString());
+                                    let roleResolve = guild.roles.resolve(role);
+                                    if (roleResolve) roles.push(roleResolve.toString());
                                     if (role == "@everyone") roles.push("@everyone");
                                 }
                                 commands.push(`**${command}:** ${roles.length ? roles.join(' ') : "none"}`);
@@ -77,7 +78,7 @@ class Permissions extends Discord.Command {
                                 reply.setDescription(content[1]);
                                 const perms = (await handler.database.getGuildPluginAliasesAndPerms(guild.id, plugin, handler.plugins.get(plugin).aliases, handler.plugins.get(plugin).perms)).perms;
                                 const regexMatch = content[2].match(/[^\d]*?(\d+)/);
-                                if (regexMatch && guild.roles.has(regexMatch[1]) && regexMatch[1] != guild.id && !perms[content[1]].includes(regexMatch[1])) {
+                                if (regexMatch && guild.roles.cache.has(regexMatch[1]) && regexMatch[1] != guild.id && !perms[content[1]].includes(regexMatch[1])) {
                                     perms[content[1]] = perms[content[1]] ? perms[content[1]].concat(regexMatch[1]) : [regexMatch[1]];
                                     handler.database.setGuildPluginPerms(guild.id, plugin, perms);
                                     reply.addField("Success", `Sucessfully added ${content[2]} to **${content[1]}**.`, false);

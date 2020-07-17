@@ -6,10 +6,9 @@ class AIListRoles extends Discord.Command {
     }
     message(content, member, channel, guild, message, handler) {
         let roles = [];
-        let size = guild.roles.size;
-        guild.roles.forEach(role => {
+        guild.roles.fetch().then(roles => roles.forEach(role => {
             roles.push(`**${role.position}.** ${role}: ${role.id}`);
-		});
+		}));
         roles.sort((a, b) => a.match(/(\d+)/)[1] - b.match(/(\d+)/)[1]);
         while (roles.join("\n").length >= 2048) {
             let i = roles.length;
