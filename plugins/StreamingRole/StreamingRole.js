@@ -30,7 +30,7 @@ module.exports.load = function(client) {
     client.addPlugin(new StreamingRolePL());
 
     client.on('presenceUpdate', (oldp, newp) => {
-        client.database.getGuild(newMember.guild.id, client.prefix).then(response => {
+        client.database.getGuild(newp.member.guild.id, client.prefix).then(response => {
             if (response.enabled.includes("StreamingRole")) {
                 if (newp.game?.streaming) {
                     client.database.getGuildPluginData(newp.member.guild.id, "StreamingRole", {id:null}).then(response => {
