@@ -6,7 +6,10 @@ class Client extends Discord.Client {
     constructor(database, defaultPrefix, owner) {
         super();
         this.on("message", this.handle);
-        this.on("ready", () => { console.log(`${this.user.username} ready!`)});
+        this.on("ready", () => { console.log(`${this.user.username} ready!`) });
+        this.on("guildUpdate", (old, guild) => {
+            message.guild.roles.fetch().catch(console.log);
+        });
         this.plugins = new Discord.Collection();
         this.database = database;
         this.prefix = defaultPrefix;
@@ -22,6 +25,7 @@ class Client extends Discord.Client {
         }
         return false;
     }
+
     handle(msg) {
         const gID = msg.guild.id;
         let content = msg.content;
@@ -90,7 +94,6 @@ class Command {
             reply.addField("Aliases",  aliases[this.name].join(", "));
             const roles = [];
             for (const role of perms[this.name]) {
-                await message.guild.roles.fetch();
                 if (guild.roles.cache.has(role)) roles.push(guild.roles.cache.get(role).toString());
                 if (role == "@everyone") roles.push("@everyone");
             }

@@ -25,8 +25,8 @@ class MRRole extends Discord.Command {
                 handler.database.getGuildPluginData(guild.id, this.plugin, {static:{}, dynamic:{}}).then(data => {
                     const reply = new Discord.RichEmbed()
                         .setTitle("MemberRankRole: list");
-                    if (Object.keys(data.static).length) reply.addField("Static", Object.keys(data.static).filter(d => guild.roles.has(data.static[d])).map(d => `Top ${d}: ${guild.roles.get(data.static[d])}`).join('\n'));
-                    if (Object.keys(data.dynamic).length) reply.addField("Dynamic", Object.keys(data.dynamic).filter(d => guild.roles.has(data.dynamic[d])).map(d => `Top ${d}%: ${guild.roles.get(data.dynamic[d])}`).join('\n'));
+                    if (Object.keys(data.static).length) reply.addField("Static", Object.keys(data.static).filter(d => guild.roles.cache.has(data.static[d])).map(d => `Top ${d}: ${guild.roles.cache.get(data.static[d])}`).join('\n'));
+                    if (Object.keys(data.dynamic).length) reply.addField("Dynamic", Object.keys(data.dynamic).filter(d => guild.roles.cache.has(data.dynamic[d])).map(d => `Top ${d}%: ${guild.roles.cache.get(data.dynamic[d])}`).join('\n'));
                     channel.send(reply);
                 });
                 break;
@@ -36,13 +36,13 @@ class MRRole extends Discord.Command {
                     const reply = new Discord.RichEmbed()
                         .setTitle("MemberRankRole: add");
                     if (match) {
-                        if (match[1] && guild.roles.has(match[3])) {
+                        if (match[1] && guild.roles.cache.has(match[3])) {
                             data.dynamic[match[1]] = match[3];
-                            reply.addField("Success", `Top ${match[1]}%: ${guild.roles.get(match[3])}`);
+                            reply.addField("Success", `Top ${match[1]}%: ${guild.roles.cache.get(match[3])}`);
                             handler.database.setGuildPluginData(guild.id, this.plugin, data);
-                        } else if (match[2] && guild.roles.has(match[3])) {
+                        } else if (match[2] && guild.roles.cache.has(match[3])) {
                             data.static[match[2]] = match[3];
-                            reply.addField("Success", `Top ${match[2]}: ${guild.roles.get(match[3])}`);
+                            reply.addField("Success", `Top ${match[2]}: ${guild.roles.cache.get(match[3])}`);
                             handler.database.setGuildPluginData(guild.id, this.plugin, data);
                         } else {
                             reply.addField("Failed", "**role** didn't parse.");
@@ -161,13 +161,13 @@ function updateMember(member, guild, client) {
             const userRank = await client.database.getGuildMemberEXP(guild.id, "MemberRank", member.id);
             ++userRank.rank;
             for (const [rank, role] of Object.entries(ranks.static)) {
-                if (userRank.rank <= rank && guild.roles.has(role) && !member.roles.has(role)) member.addRole(role);
-                if (userRank.rank > rank && guild.roles.has(role) && member.roles.has(role)) member.removeRole(role);
+                if (userRank.rank <= rank && guild.roles.cache.has(role) && !member.roles.has(role)) member.addRole(role);
+                if (userRank.rank > rank && guild.roles.cache.has(role) && member.roles.has(role)) member.removeRole(role);
             }
             const userCount = await client.database.getUserCount(guild.id, "MemberRank");
             for (const [rank, role] of Object.entries(ranks.dynamic)) {
-                if (userRank.rank <= (userCount * rank / 100) && guild.roles.has(role) && !member.roles.has(role)) member.addRole(role);
-                if (userRank.rank > (userCount * rank / 100) && guild.roles.has(role) && member.roles.has(role)) member.removeRole(role);
+                if (userRank.rank <= (userCount * rank / 100) && guild.roles.cache.has(role) && !member.roles.has(role)) member.addRole(role);
+                if (userRank.rank > (userCount * rank / 100) && guild.roles.cache.has(role) && member.roles.has(role)) member.removeRole(role);
             }
             resolve(userRank.rank);
         });
