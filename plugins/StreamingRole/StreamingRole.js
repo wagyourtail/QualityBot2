@@ -36,7 +36,7 @@ module.exports.load = function(client) {
                     client.database.getGuildPluginData(newp.member.guild.id, "StreamingRole", {id:null}).then(response => {
                         if (response.id) newp.member.roles.add(response.id, "Streaming");
                     });
-                } else if (oldp.game?.streaming) {
+                } else if (oldp?.game?.streaming) {
                     client.database.getGuildPluginData(newp.member.guild.id, "StreamingRole", {id:null}).then(response => {
                         if (response.id) newp.member.roles.remove(response.id, "No Longer Streaming");
                     });
