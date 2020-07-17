@@ -18,7 +18,7 @@ class Client extends Discord.Client {
     checkRoles(member, commandPerms) {
         if (commandPerms.includes("@everyone")) return true;
         for (const perm of commandPerms) {
-            if (member.roles.has(perm)) return true;
+            if (member.roles.cache.has(perm)) return true;
         }
         return false;
     }
@@ -85,12 +85,13 @@ class Command {
             .addField("Usage", this.usage)
             .addField("Description", this.description)
             .setDescription(this.plugin);
-        handler.database.getGuildPluginAliasesAndPerms(guild.id, this.plugin, handler.plugins.get(this.plugin).aliases, handler.plugins.get(this.plugin).perms).then(response => {
+        handler.database.getGuildPluginAliasesAndPerms(guild.id, this.plugin, handler.plugins.get(this.plugin).aliases, handler.plugins.get(this.plugin).perms).then(async (response) => {
             const { aliases, perms } = response;
             reply.addField("Aliases",  aliases[this.name].join(", "));
             const roles = [];
             for (const role of perms[this.name]) {
-                if (guild.roles.has(role)) roles.push(guild.roles.get(role).toString());
+                await message.guild.roles.fetch();
+                if (guild.roles.cache.has(role)) roles.push(guild.roles.cache.get(role).toString());
                 if (role == "@everyone") roles.push("@everyone");
             }
             if (roles.length > 0) reply.addField("Permissions", roles.join(", "));
