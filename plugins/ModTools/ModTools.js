@@ -326,8 +326,9 @@ module.exports.load = function (client) {
                     client.database.getGuildPluginData(channel.guild.id, "ModTools", {logChannel:null, muteRole:null, logChanges:false}).then((response) => {
                         if (response.muteRole) {
                             let overwrite = true;
-                            if (channel.permissionOverwrites.has(response.muteRole)) overwrite = !(channel.permissionOverwrites.get(response.muteRole).allow & 2048);
-                            if (overwrite) channel.overwritePermissions(response.muteRole, {SEND_MESSAGES: false}, "auto update muterole perms.");
+                            let perms = channel.permissionOverwrites;
+                            if (channel.permissionOverwrites.has(response.muteRole)) overwrite = !perms.get(response.muteRole).deny.has("SEND_MESSAGES");
+                            if (overwrite) perms.get(response.muteRole).update({ SEND_MESSAGES: false });
                         }
                     });
                 }
