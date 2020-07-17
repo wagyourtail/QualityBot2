@@ -7,18 +7,6 @@ class Client extends Discord.Client {
         super();
         this.on("message", this.handle);
         this.on("ready", () => { console.log(`${this.user.username} ready!`) });
-        this.on("guildUpdate", (old, guild) => {
-            guild.roles.fetch().catch(console.log);
-        });
-        this.on("guildMemberUpdate", (old, member) => {
-            member.roles.fetch().catch(console.log);
-        });
-        this.on("guildMemberAdd", (member) => {
-            member.guild.members.fetch();
-        });
-        this.on("guildMemberRemove", (member) => {
-            member.guild.members.fetch();
-        });
         this.plugins = new Discord.Collection();
         this.database = database;
         this.prefix = defaultPrefix;
