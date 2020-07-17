@@ -9,7 +9,7 @@ const waitForReact = (channel,author,msg) => {
 		const sel = {"✔":0,"✖":1,"ℹ":2,"🇵":3,"🇳":4}
 
 		msg.awaitReactions(filter, {max:1}).then(collected => {
-			Array.from(collected.values())[0].remove(author.id);
+			Array.from(collected.values())[0].users.remove(author.id);
 			if (Object.keys(sel).includes(collected.keyArray()[0])) {
 				res(sel[collected.keyArray()[0]]);
 			}
