@@ -27,7 +27,7 @@ class akinator extends Discord.Command {
     }
     message(content, author, channel, guild, message, handler) {
 		const a = async () => {
-			const akinator = new Aki('en2');
+			const akinator = new Aki('en');
 			const gd = await akinator.start();
 			let ni = {'nextStep':0,'progress':'0'};
 			const msg = await channel.send(new Discord.RichEmbed().setTitle("Akinator").setDescription(`Question #${ni.nextStep+1}`).addField(gd.question,`Progress: ${parseInt(ni.progress)}%`).addField("Options","✔:Yes	✖:No	ℹ:Don't Know	🇵:Probably	🇳:Probably Not", true))
