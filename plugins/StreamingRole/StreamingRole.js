@@ -29,16 +29,16 @@ class StreamingRolePL extends Discord.Plugin {
 module.exports.load = function(client) {
     client.addPlugin(new StreamingRolePL());
 
-    client.on('presenceUpdate', (oldMember, newMember) => {
+    client.on('presenceUpdate', (oldp, newp) => {
         client.database.getGuild(newMember.guild.id, client.prefix).then(response => {
             if (response.enabled.includes("StreamingRole")) {
-                if (newMember.presence.game?.streaming) {
-                    client.database.getGuildPluginData(newMember.guild.id, "StreamingRole", {id:null}).then(response => {
-                        if (response.id) newMember.roles.add(response.id, "Streaming");
+                if (newp.game?.streaming) {
+                    client.database.getGuildPluginData(newp.member.guild.id, "StreamingRole", {id:null}).then(response => {
+                        if (response.id) newp.member.roles.add(response.id, "Streaming");
                     });
-                } else if (oldMember.presence.game?.streaming) {
-                    client.database.getGuildPluginData(newMember.guild.id, "StreamingRole", {id:null}).then(response => {
-                        if (response.id) newMember.roles.remove(response.id, "No Longer Streaming");
+                } else if (oldp.game?.streaming) {
+                    client.database.getGuildPluginData(newp.member.guild.id, "StreamingRole", {id:null}).then(response => {
+                        if (response.id) newp.member.roles.remove(response.id, "No Longer Streaming");
                     });
                 }
             }
