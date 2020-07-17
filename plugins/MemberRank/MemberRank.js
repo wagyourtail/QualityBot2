@@ -80,7 +80,7 @@ class MRXP extends Discord.Command {
         const match = content.match(/[^\d]*(\d+)/)
         const reply = new Discord.RichEmbed()
             .setTitle("MemberRankXP");
-        if (match && guild.members.has(match[1])) {
+        if (match && guild.members.cache.has(match[1])) {
             reply.setDescription(guild.members.get(match[1]));
             handler.database.getGuildMemberEXP(guild.id, this.plugin, match[1]).then(res => {
                 reply.addField(`Rank: #${res.rank === false ? guild.members.size : res.rank + 1}`, `\`${res.score}\` xp`);
@@ -105,7 +105,7 @@ class MRAdjust extends Discord.Command {
         if (match) {
             const reply = new Discord.RichEmbed()
                 .setTitle(`MemberRankAdjust: ${match[1]}`);
-            if (guild.members.has(match[2])) {
+            if (guild.members.cache.has(match[2])) {
                 handler.database.guildMemberAddEXP(guild.id, this.plugin, match[2], match[1] == "add" ? parseInt(match[3]) : -parseInt(match[3]));
                 reply.addField("Success", `${match[1] == "add" ? "added" : "subtracted"} ${match[3]} xp from ${guild.members.get(match[2])}`);
             } else {
@@ -132,7 +132,7 @@ class MRTop extends Discord.Command {
             let i = content*10;
             const ranks = []
             for (const memb of members) {
-                if (guild.members.has(memb.member)) {
+                if (guild.members.cache.has(memb.member)) {
                     ranks.push(`**${++i}**: ${guild.members.get(memb.member)}: ${memb.score}`);
                 } else {
                     handler.database.deleteUser(guild.id, "MemberRank", memb.member);
@@ -187,7 +187,7 @@ module.exports.load = function (client) {
                         client.database.setGuildMemberLastMessage(msg.guild.id, "MemberRank", msg.author.id, msg.createdTimestamp);
                         updateMember(msg.member, msg.guild, client).then(async (rank) => {
                             const member = (await client.database.getRanks(msg.guild.id, "MemberRank", rank, 1))[0];
-                            if (member && msg.guild.members.has(member.member)) updateMember(msg.guild.members.get(member.member), msg.guild, client);
+                            if (member && msg.guild.members.cache.has(member.member)) updateMember(msg.guild.members.get(member.member), msg.guild, client);
                             else if (member) client.database.deleteUser(msg.guild.id, "MemberRank", member.member);
                         });
                     }
