@@ -81,7 +81,7 @@ module.exports.load = function (client) {
             if (response.enabled.includes("SecretPhrase")) {
                 client.database.getGuildPluginData(message.guild.id, "SecretPhrase", {roles:{}}).then(data => {
                     if (data.roles[message.content.toLowerCase()]) {
-                        message.member.addRole(data.roles[message.content.toLowerCase()]);
+                        message.member.roles.add(data.roles[message.content.toLowerCase()]);
                     }
                 });
             }
