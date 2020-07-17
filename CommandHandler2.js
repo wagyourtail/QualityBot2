@@ -100,7 +100,7 @@ class Command {
     message(content, member, channel, guild, message, handler) { }
 }
 
-class RichEmbed extends Discord.RichEmbed {
+class RichEmbed extends Discord.MessageEmbed {
 	constructor() {
 		super();
 		this.setTimestamp();
