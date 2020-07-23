@@ -150,7 +150,7 @@ module.exports.load = function(client) {
                 if (response.enabled.includes("GameRole")) {
                     client.database.getGuildPluginData(event.d.guild_id, "GameRole", {roles:{}, message:[]}).then(response => {
                         if ([].concat(response.message).map(e => e.id).includes(event.d.message_id) && response.roles[event.d.emoji.id]) {
-                            client.guilds.resolve(event.d.guild_id).members.resolve(event.d.user_id).addRole(response.roles[event.d.emoji.id]).catch(console.log);
+                            client.guilds.resolve(event.d.guild_id)?.members.resolve(event.d.user_id)?.roles.add(response.roles[event.d.emoji.id]).catch(console.log);
                         }
                     });
                 }
@@ -160,7 +160,7 @@ module.exports.load = function(client) {
                 if (response.enabled.includes("GameRole")) {
                     client.database.getGuildPluginData(event.d.guild_id, "GameRole", {roles:{}, message:[]}).then(response => {
                         if ([].concat(response.message).map(e => e.id).includes(event.d.message_id) && response.roles[event.d.emoji.id]) {
-                            client.guilds.resolve(event.d.guild_id).members.resolve(event.d.user_id).removeRole(response.roles[event.d.emoji.id]).catch(console.log);
+                            client.guilds.resolve(event.d.guild_id)?.members.resolve(event.d.user_id)?.roles.remove(response.roles[event.d.emoji.id]).catch(console.log);
                         }
                     });
                 }
