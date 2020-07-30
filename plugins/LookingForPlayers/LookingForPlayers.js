@@ -44,25 +44,27 @@ class LookingForPlayersPL extends Discord.Plugin {
 module.exports.load = function (client) {
 	client.addPlugin(new LookingForPlayersPL());
 
-	client.on('voiceStateUpdate', (oldMember, newMember) => {
-        client.database.getGuild(newMember.guild.id, client.prefix).then(response => {
+	client.on('voiceStateUpdate', (oldState, newState) => {
+        client.database.getGuild(newState.guild.id, client.prefix).then(response => {
             if (response.enabled.includes("LookingForPlayers")) {
-                client.database.getGuildPluginData(newMember.guild.id, "LookingForPlayers", {id:null}).then(response => {
-                    if (response.id && newMember) {
-                        if (newMember.voiceChannel && newMember.voiceChannel.parentID == response.id) {
-                            if (newMember.voiceChannel.members.size == 1 && (!oldMember.voiceChannel || oldMember.voiceChannel.id != newMember.voiceChannel.id)) {
-                                if (newMember.presence.game) newMember.voiceChannel.setName(newMember.presence.game.name);
-                                newMember.guild.createChannel(newMember.voiceChannel.parent.name, { type: 'voice', parent: response.id });
+                client.database.getGuildPluginData(newState.guild.id, "LookingForPlayers", {id:null}).then(response => {
+                    if (response.id && newState) {
+                        if (newState.channel?.parent?.id == response.id) {
+                            if (newState.channel.members.size == 1 && (newState.channelID != oldState?.channelID)) {
+                                for (const activity of newState.member.presence.activities) {
+                                    if (activity.type == "PLAYING") newState.channel.setName(activity.name);
+                                }
+                                newState.guild.channels.create(newState.channel.parent.name, { type: 'voice', parent: response.id });
                             }
                         }
-                        if (oldMember.voiceChannel && oldMember.voiceChannel.parentID == response.id) {
-                            const empty = Array.from(oldMember.voiceChannel.parent.children.filter(child => child.type == 'voice' && !child.members.size).values());
+                    }
+                    if (response.id && oldState.channel?.parent?.id == response.id) {
+                        const empty = Array.from(oldState.channel.parent.children.filter(child => child.type == 'voice' && !child.members.size).values());
 
-                            empty.pop().setName(oldMember.voiceChannel.parent.name);
-                            empty.forEach(channel => {
-                                channel.delete("empty LookingForPlayers channel");
-                            });
-                        }
+                        empty.pop().setName(oldState.channel.parent.name);
+                        empty.forEach(channel => {
+                            channel.delete("empty LookingForPlayers channel");
+                        });
                     }
                 });
             }
