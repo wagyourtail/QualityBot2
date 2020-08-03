@@ -327,8 +327,14 @@ module.exports.load = function (client) {
                         if (response.muteRole) {
                             let overwrite = true;
                             let perms = channel.permissionOverwrites;
-                            if (channel.permissionOverwrites.has(response.muteRole)) overwrite = !perms.get(response.muteRole).deny.has("SEND_MESSAGES");
-                            if (overwrite) perms.get(response.muteRole).update({ SEND_MESSAGES: false });
+                            if (perms.has(response.muteRole)) overwrite = !perms.get(response.muteRole).deny.has("SEND_MESSAGES");
+                            if (overwrite) {
+                                if (perms.has(response.muteRole)) perms.get(response.muteRole).update({ SEND_MESSAGES: false });
+                                else {
+                                    perms.set(response.muteRole, { id: response.muteRole, deny: ["SEND_MESSAGES"] });
+                                    channel.overwritePermissions(perms);
+                                }
+                            }
                         }
                     });
                 }
