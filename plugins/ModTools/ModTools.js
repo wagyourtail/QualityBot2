@@ -42,10 +42,19 @@ class MuteRole extends Discord.Command {
             channel.send(new Discord.RichEmbed().setTitle("Mute Role").setDescription(`Mute Role set to ${response.muteRole ? guild.roles.resolve(match[1]) : "`none`"}.`));
             handler.database.setGuildPluginData(guild.id, this.plugin, response);
             if (response.muteRole) {
-                Array.from(guild.channels).filter(e => e[1].type != "voice").forEach(e => {
+                Array.from(guild.channels.cache).filter(e => e[1].type != "voice").forEach((e) => {
+                    let [snowflake, channel] = e;
+                    
                     let overwrite = true;
-                    if (e[1].permissionOverwrites.has(response.muteRole)) overwrite = !(e[1].permissionOverwrites.get(response.muteRole).allow & 2048);
-                    if (overwrite) e[1].overwritePermissions(response.muteRole, {SEND_MESSAGES: false}, "auto update muterole perms.");
+                    let perms = channel.permissionOverwrites;
+                    if (perms.has(response.muteRole)) overwrite = !perms.get(response.muteRole).deny.has("SEND_MESSAGES");
+                    if (overwrite) {
+                        if (perms.has(response.muteRole)) perms.get(response.muteRole).update({ SEND_MESSAGES: false });
+                        else {
+                            perms.set(response.muteRole, { id: response.muteRole, deny: ["SEND_MESSAGES"] });
+                            channel.overwritePermissions(perms);
+                        }
+                    }
                 });
             }
         });
